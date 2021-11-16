@@ -23,18 +23,18 @@ WEAK-FUNEXT-FUNEXT :
   {l1 l2 : Level} →
   ((A : UU l1) (B : A → UU l2) (f : (x : A) → B x) → FUNEXT f) →
   ((A : UU l1) (B : A → UU l2) → WEAK-FUNEXT A B)
-WEAK-FUNEXT-FUNEXT funext A B is-contr-B =
-  let pi-center = (λ x → center (is-contr-B x)) in
-  pair
-    ( pi-center)
-    ( λ f → map-inv-is-equiv (funext A B pi-center f)
-      ( λ x → contraction (is-contr-B x) (f x)))
+pr1 (WEAK-FUNEXT-FUNEXT funext A B is-contr-B) x = center (is-contr-B x)
+pr2 (WEAK-FUNEXT-FUNEXT funext A B is-contr-B) f =
+  map-inv-is-equiv
+    ( funext A B (λ x → center (is-contr-B x)) f)
+    ( λ x → contraction (is-contr-B x) (f x))
 
 postulate funext : {i j : Level} {A : UU i} {B : A → UU j} (f : (x : A) → B x) → FUNEXT f
 
 equiv-funext : {i j : Level} {A : UU i} {B : A → UU j} {f g : (x : A) → B x} →
   (Id f g) ≃ (f ~ g)
-equiv-funext {f = f} {g} = pair htpy-eq (funext f g) 
+pr1 (equiv-funext {f = f} {g}) = htpy-eq
+pr2 (equiv-funext {f = f} {g}) = funext f g
 
 eq-htpy :
   {i j : Level} {A : UU i} {B : A → UU j} {f g : (x : A) → B x} →
@@ -64,7 +64,8 @@ eq-htpy-refl-htpy f = isretr-eq-htpy refl
 equiv-eq-htpy :
   {i j : Level} {A : UU i} {B : A → UU j} {f g : (x : A) → B x} →
   (f ~ g) ≃ Id f g
-equiv-eq-htpy {f = f} {g} = pair eq-htpy (is-equiv-eq-htpy f g)
+pr1 (equiv-eq-htpy {f = f} {g}) = eq-htpy
+pr2 (equiv-eq-htpy {f = f} {g}) = is-equiv-eq-htpy f g
 
 ev-refl-htpy :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2}
@@ -140,8 +141,8 @@ is-prop-type-Π-Prop A P = is-prop-Π (λ x → is-prop-type-Prop (P x))
 Π-Prop :
   {l1 l2 : Level} (A : UU l1) →
   (A → UU-Prop l2) → UU-Prop (l1 ⊔ l2)
-Π-Prop A P =
-  pair (type-Π-Prop A P) (is-prop-type-Π-Prop A P)
+pr1 (Π-Prop A P) = type-Π-Prop A P
+pr2 (Π-Prop A P) = is-prop-type-Π-Prop A P
 
 type-function-Prop :
   {l1 l2 : Level} → UU l1 → UU-Prop l2 → UU (l1 ⊔ l2)
@@ -171,8 +172,8 @@ is-prop-type-function-Prop A P =
 
 function-Prop :
   {l1 l2 : Level} → UU l1 → UU-Prop l2 → UU-Prop (l1 ⊔ l2)
-function-Prop A P =
-  pair (type-function-Prop A P) (is-prop-type-function-Prop A P)
+pr1 (function-Prop A P) = type-function-Prop A P
+pr2 (function-Prop A P) = is-prop-type-function-Prop A P
 
 type-hom-Prop :
   { l1 l2 : Level} (P : UU-Prop l1) (Q : UU-Prop l2) → UU (l1 ⊔ l2)
@@ -185,10 +186,8 @@ is-prop-type-hom-Prop P Q = is-prop-type-function-Prop (type-Prop P) Q
 
 hom-Prop :
   { l1 l2 : Level} → UU-Prop l1 → UU-Prop l2 → UU-Prop (l1 ⊔ l2)
-hom-Prop P Q =
-  pair
-    ( type-hom-Prop P Q)
-    ( is-prop-type-hom-Prop P Q)
+pr1 (hom-Prop P Q) = type-hom-Prop P Q
+pr2 (hom-Prop P Q) = is-prop-type-hom-Prop P Q
 
 is-prop-Π' :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} →
@@ -212,14 +211,14 @@ is-set-Π = is-trunc-Π zero-𝕋
 is-contr-total-htpy :
   {i j : Level} {A : UU i} {B : A → UU j} (f : (x : A) → B x) →
   is-contr (Σ ((x : A) → B x) (λ g → f ~ g))
-is-contr-total-htpy f =
-  pair
-    ( pair f refl-htpy)
-    ( λ t →
-      ( inv (contraction
-        ( is-contr-total-htpy-FUNEXT f (funext f))
-        ( pair f refl-htpy))) ∙
-      ( contraction (is-contr-total-htpy-FUNEXT f (funext f)) t))
+pr1 (pr1 (is-contr-total-htpy f)) = f
+pr2 (pr1 (is-contr-total-htpy f)) = refl-htpy
+pr2 (is-contr-total-htpy f) t =
+  ( inv
+    ( contraction
+      ( is-contr-total-htpy-FUNEXT f (funext f))
+      ( pair f refl-htpy))) ∙
+  ( contraction (is-contr-total-htpy-FUNEXT f (funext f)) t)
 
 Π-total-fam :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2}
@@ -242,7 +241,8 @@ Eq-type-choice-∞ {A = A} {B} C t t' =
 reflexive-Eq-type-choice-∞ :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} (C : (x : A) → B x → UU l3)
   (t : type-choice-∞ C) → Eq-type-choice-∞ C t t
-reflexive-Eq-type-choice-∞ C (pair f g) = pair refl-htpy refl-htpy
+pr1 (reflexive-Eq-type-choice-∞ C (pair f g)) = refl-htpy
+pr2 (reflexive-Eq-type-choice-∞ C (pair f g)) = refl-htpy
 
 Eq-type-choice-∞-eq :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} (C : (x : A) → B x → UU l3)
@@ -278,12 +278,14 @@ eq-Eq-type-choice-∞ C {t} {t'} =
 choice-∞ :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {C : (x : A) → B x → UU l3} →
   Π-total-fam C → type-choice-∞ C
-choice-∞ φ = pair (λ x → pr1 (φ x)) (λ x → pr2 (φ x))
+pr1 (choice-∞ φ) x = pr1 (φ x)
+pr2 (choice-∞ φ) x = pr2 (φ x)
 
 inv-choice-∞ :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {C : (x : A) → B x → UU l3} →
   type-choice-∞ C → Π-total-fam C
-inv-choice-∞ ψ x = pair ((pr1 ψ) x) ((pr2 ψ) x)
+pr1 (inv-choice-∞ ψ x) = pr1 ψ x
+pr2 (inv-choice-∞ ψ x) = pr2 ψ x
 
 issec-inv-choice-∞ :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {C : (x : A) → B x → UU l3} →
@@ -311,7 +313,8 @@ is-equiv-choice-∞ {A = A} {B = B} {C = C} =
 equiv-choice-∞ :
   { l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {C : (x : A) → B x → UU l3} →
   Π-total-fam C ≃ type-choice-∞ C
-equiv-choice-∞ = pair choice-∞ is-equiv-choice-∞
+pr1 equiv-choice-∞ = choice-∞
+pr2 equiv-choice-∞ = is-equiv-choice-∞
 
 distributive-Π-Σ :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {C : (x : A) → B x → UU l3} →
@@ -330,7 +333,8 @@ is-equiv-inv-choice-∞ {A = A} {B = B} {C = C} =
 equiv-inv-choice-∞ :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} (C : (x : A) → B x → UU l3) →
   (type-choice-∞ C) ≃ (Π-total-fam C)
-equiv-inv-choice-∞ C = pair inv-choice-∞ is-equiv-inv-choice-∞
+pr1 (equiv-inv-choice-∞ C) = inv-choice-∞
+pr2 (equiv-inv-choice-∞ C) = is-equiv-inv-choice-∞
 
 inv-distributive-Π-Σ :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} (C : (x : A) → B x → UU l3) →
@@ -340,19 +344,16 @@ inv-distributive-Π-Σ = equiv-inv-choice-∞
 is-equiv-ev-pair :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {C : Σ A B → UU l3} →
   is-equiv (ev-pair {C = C})
-is-equiv-ev-pair =
-  pair
-    ( pair ind-Σ refl-htpy)
-    ( pair ind-Σ
-      ( λ f → eq-htpy
-        ( ind-Σ
-          {C = (λ t → Id (ind-Σ (ev-pair f) t) (f t))}
-          (λ x y → refl))))
+pr1 (pr1 is-equiv-ev-pair) = ind-Σ
+pr2 (pr1 is-equiv-ev-pair) = refl-htpy
+pr1 (pr2 is-equiv-ev-pair) = ind-Σ
+pr2 (pr2 is-equiv-ev-pair) f = eq-htpy (ind-Σ (λ x y → refl))
 
 equiv-ev-pair :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {C : Σ A B → UU l3} →
   ((x : Σ A B) → C x) ≃ ((a : A) (b : B a) → C (pair a b))
-equiv-ev-pair = pair ev-pair is-equiv-ev-pair
+pr1 equiv-ev-pair = ev-pair
+pr2 equiv-ev-pair = is-equiv-ev-pair
 
 precomp-Π :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f : A → B) (C : B → UU l3) →
@@ -389,10 +390,9 @@ is-equiv-precomp-Π-is-equiv f is-equiv-f =
 equiv-precomp-Π :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (e : A ≃ B) →
   (C : B → UU l3) → ((b : B) → C b) ≃ ((a : A) → C (map-equiv e a))
-equiv-precomp-Π e C =
-  pair
-    ( precomp-Π (map-equiv e) C)
-    ( is-equiv-precomp-Π-is-equiv (map-equiv e) (is-equiv-map-equiv e) C)
+pr1 (equiv-precomp-Π e C) = precomp-Π (map-equiv e) C
+pr2 (equiv-precomp-Π e C) =
+  is-equiv-precomp-Π-is-equiv (map-equiv e) (is-equiv-map-equiv e) C
 
 ind-is-equiv :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2}
@@ -437,10 +437,9 @@ is-equiv-precomp-is-equiv f is-equiv-f =
 equiv-precomp :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (e : A ≃ B) (C : UU l3) →
   (B → C) ≃ (A → C)
-equiv-precomp e C =
-  pair
-    ( precomp (map-equiv e) C)
-    ( is-equiv-precomp-is-equiv (map-equiv e) (is-equiv-map-equiv e) C)
+pr1 (equiv-precomp e C) = precomp (map-equiv e) C
+pr2 (equiv-precomp e C) =
+  is-equiv-precomp-is-equiv (map-equiv e) (is-equiv-map-equiv e) C
 
 is-equiv-is-equiv-precomp-subuniverse :
   { l1 l2 : Level}
@@ -559,10 +558,8 @@ is-equiv-map-Π f is-equiv-f =
 equiv-map-Π :
   {l1 l2 l3 : Level} {I : UU l1} {A : I → UU l2} {B : I → UU l3}
   (e : (i : I) → (A i) ≃ (B i)) → ((i : I) → A i) ≃ ((i : I) → B i)
-equiv-map-Π e =
-  pair
-    ( map-Π (λ i → map-equiv (e i)))
-    ( is-equiv-map-Π _ (λ i → is-equiv-map-equiv (e i)))
+pr1 (equiv-map-Π e) = map-Π (λ i → map-equiv (e i))
+pr2 (equiv-map-Π e) = is-equiv-map-Π _ (λ i → is-equiv-map-equiv (e i))
 
 module _
   { l1 l2 l3 l4 : Level}
@@ -623,7 +620,8 @@ module _
           ( is-equiv-tr B (issec-map-inv-is-equiv (is-equiv-map-equiv e) a))))
 
   equiv-Π : ((a' : A') → B' a') ≃ ((a : A) → B a)
-  equiv-Π = pair map-equiv-Π is-equiv-map-equiv-Π
+  pr1 equiv-Π = map-equiv-Π
+  pr2 equiv-Π = is-equiv-map-equiv-Π
 
 id-map-equiv-Π :
   { l1 l2 : Level} {A : UU l1} (B : A → UU l2) →
@@ -637,7 +635,8 @@ module _
   ev-inl-inr :
     {l3 : Level} (P : coprod A B → UU l3) →
     ((t : coprod A B) → P t) → ((x : A) → P (inl x)) × ((y : B) → P (inr y))
-  ev-inl-inr P s = pair (λ x → s (inl x)) (λ y → s (inr y))
+  pr1 (ev-inl-inr P s) x = s (inl x)
+  pr2 (ev-inl-inr P s) y = s (inr y)
 
   dependent-universal-property-coprod :
     {l3 : Level} (P : coprod A B → UU l3) → is-equiv (ev-inl-inr P)
@@ -650,9 +649,10 @@ module _
   equiv-dependent-universal-property-coprod :
     {l3 : Level} (P : coprod A B → UU l3) →
     ((x : coprod A B) → P x) ≃ (((a : A) → P (inl a)) × ((b : B) → P (inr b)))
-  equiv-dependent-universal-property-coprod P =
-    pair (ev-inl-inr P) (dependent-universal-property-coprod P)
-
+  pr1 (equiv-dependent-universal-property-coprod P) = ev-inl-inr P
+  pr2 (equiv-dependent-universal-property-coprod P) =
+    dependent-universal-property-coprod P
+  
   universal-property-coprod :
     {l3 : Level} (X : UU l3) →
     is-equiv (ev-inl-inr (λ (t : coprod A B) → X))
@@ -697,9 +697,8 @@ module _
 
 fib-emb-Prop :
   {i j : Level} {A : UU i} {B : UU j} (f : A ↪ B) → B → UU-Prop (i ⊔ j)
-fib-emb-Prop f y =
-  pair ( fib (map-emb f) y)
-       ( is-prop-map-is-emb (is-emb-map-emb f) y)
+pr1 (fib-emb-Prop f y) = fib (map-emb f) y
+pr2 (fib-emb-Prop f y) = is-prop-map-is-emb (is-emb-map-emb f) y
 
 is-emb-pr1 :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} →
@@ -709,8 +708,8 @@ is-emb-pr1 {B = B} H =
 
 equiv-ap-pr1 : {i j : Level} {A : UU i} {B : A → UU j} →
   is-subtype B → {s t : Σ A B} → Id s t ≃ Id (pr1 s) (pr1 t)
-equiv-ap-pr1 is-subtype-B {s} {t} =
-  pair (ap pr1) (is-emb-pr1 is-subtype-B s t)
+pr1 (equiv-ap-pr1 is-subtype-B {s} {t}) = ap pr1
+pr2 (equiv-ap-pr1 is-subtype-B {s} {t}) = is-emb-pr1 is-subtype-B s t
 
 is-subtype-is-emb-pr1 : {i j : Level} {A : UU i} {B : A → UU j} →
   is-emb (pr1 {B = B}) → is-subtype B
@@ -750,8 +749,8 @@ module _
       ( is-contr-retr-is-equiv is-equiv-f))
 
   is-equiv-Prop : (f : A → B) → UU-Prop (l1 ⊔ l2)
-  is-equiv-Prop f =
-    pair (is-equiv f) (is-subtype-is-equiv f)
+  pr1 (is-equiv-Prop f) = is-equiv f
+  pr2 (is-equiv-Prop f) = is-subtype-is-equiv f
 
   is-emb-map-equiv :
     is-emb (map-equiv {A = A} {B = B})
@@ -787,8 +786,8 @@ module _
 
   equiv-htpy-eq-equiv :
     (e e' : A ≃ B) → Id e e' ≃ (htpy-equiv e e')
-  equiv-htpy-eq-equiv e e' =
-    pair htpy-eq-equiv (is-equiv-htpy-eq-equiv e e')
+  pr1 (equiv-htpy-eq-equiv e e') = htpy-eq-equiv
+  pr2 (equiv-htpy-eq-equiv e e') = is-equiv-htpy-eq-equiv e e'
 
   eq-htpy-equiv : {e e' : A ≃ B} → ( htpy-equiv e e') → Id e e'
   eq-htpy-equiv {e = e} {e'} = map-inv-is-equiv (is-equiv-htpy-eq-equiv e e')
@@ -816,10 +815,10 @@ module _
 
   is-contr-equiv-is-contr :
     is-contr A → is-contr B → is-contr (A ≃ B)
-  is-contr-equiv-is-contr is-contr-A is-contr-B =
-    pair
-      ( equiv-is-contr is-contr-A is-contr-B)
-      ( λ e → eq-htpy-equiv (λ x → eq-is-contr is-contr-B))
+  pr1 (is-contr-equiv-is-contr is-contr-A is-contr-B) =
+    equiv-is-contr is-contr-A is-contr-B
+  pr2 (is-contr-equiv-is-contr is-contr-A is-contr-B) e =
+    eq-htpy-equiv (λ x → eq-is-contr is-contr-B)
 
   is-trunc-equiv-is-trunc :
     (k : 𝕋) → is-trunc k A → is-trunc k B → is-trunc k (A ≃ B)
@@ -842,10 +841,9 @@ type-equiv-Prop P Q = (type-Prop P) ≃ (type-Prop Q)
 
 equiv-Prop :
   { l1 l2 : Level} → UU-Prop l1 → UU-Prop l2 → UU-Prop (l1 ⊔ l2)
-equiv-Prop P Q =
-  pair
-    ( type-equiv-Prop P Q)
-    ( is-prop-equiv-is-prop (is-prop-type-Prop P) (is-prop-type-Prop Q))
+pr1 (equiv-Prop P Q) = type-equiv-Prop P Q
+pr2 (equiv-Prop P Q) =
+  is-prop-equiv-is-prop (is-prop-type-Prop P) (is-prop-type-Prop Q)
 
 type-equiv-Set :
   {l1 l2 : Level} (A : UU-Set l1) (B : UU-Set l2) → UU (l1 ⊔ l2)
@@ -853,10 +851,9 @@ type-equiv-Set A B = type-Set A ≃ type-Set B
 
 equiv-Set :
   { l1 l2 : Level} → UU-Set l1 → UU-Set l2 → UU-Set (l1 ⊔ l2)
-equiv-Set A B =
-  pair
-    ( type-equiv-Set A B)
-    ( is-set-equiv-is-set (is-set-type-Set A) (is-set-type-Set B))
+pr1 (equiv-Set A B) = type-equiv-Set A B
+pr2 (equiv-Set A B) =
+  is-set-equiv-is-set (is-set-type-Set A) (is-set-type-Set B)
 
 inv-inv-equiv :
   {i j : Level} {A : UU i} {B : UU j} (e : A ≃ B) →
@@ -873,7 +870,8 @@ is-equiv-inv-equiv =
 
 equiv-inv-equiv :
   {i j : Level} {A : UU i} {B : UU j} → (A ≃ B) ≃ (B ≃ A)
-equiv-inv-equiv = pair inv-equiv is-equiv-inv-equiv
+pr1 equiv-inv-equiv = inv-equiv
+pr2 equiv-inv-equiv = is-equiv-inv-equiv
 
 compose-inv-equiv-compose-equiv :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2} {C : UU l3}
@@ -901,7 +899,8 @@ is-equiv-comp-equiv f A =
 equiv-postcomp-equiv :
   {l1 l2 l3 : Level} {B : UU l2} {C : UU l3} →
   (f : B ≃ C) → (A : UU l1) → (A ≃ B) ≃ (A ≃ C)
-equiv-postcomp-equiv f A = pair (λ e → f ∘e e) (is-equiv-comp-equiv f A)
+pr1 (equiv-postcomp-equiv f A) e = f ∘e e
+pr2 (equiv-postcomp-equiv f A) = is-equiv-comp-equiv f A
 
 _⇔_ :
   {l1 l2 : Level} → UU-Prop l1 → UU-Prop l2 → UU (l1 ⊔ l2)
@@ -910,7 +909,8 @@ P ⇔ Q = (pr1 P → pr1 Q) × (pr1 Q → pr1 P)
 equiv-iff' :
   {l1 l2 : Level} (P : UU-Prop l1) (Q : UU-Prop l2) →
   (P ⇔ Q) → (pr1 P ≃ pr1 Q)
-equiv-iff' P Q t = pair (pr1 t) (is-equiv-is-prop (pr2 P) (pr2 Q) (pr2 t))
+pr1 (equiv-iff' P Q t) = pr1 t
+pr2 (equiv-iff' P Q t) = is-equiv-is-prop (pr2 P) (pr2 Q) (pr2 t)
 
 equiv-iff :
   {l1 l2 : Level} (P : UU-Prop l1) (Q : UU-Prop l2) →
@@ -920,7 +920,8 @@ equiv-iff P Q f g = equiv-iff' P Q (pair f g)
 iff-equiv :
   {l1 l2 : Level} (P : UU-Prop l1) (Q : UU-Prop l2) →
   (pr1 P ≃ pr1 Q) → (P ⇔ Q)
-iff-equiv P Q equiv-PQ = pair (pr1 equiv-PQ) (map-inv-is-equiv (pr2 equiv-PQ))
+pr1 (iff-equiv P Q equiv-PQ) = pr1 equiv-PQ
+pr2 (iff-equiv P Q equiv-PQ) = map-inv-is-equiv (pr2 equiv-PQ)
 
 is-prop-iff :
   {l1 l2 : Level} (P : UU-Prop l1) (Q : UU-Prop l2) → is-prop (P ⇔ Q)
@@ -947,8 +948,8 @@ is-equiv-equiv-iff P Q =
 equiv-equiv-iff :
   {l1 l2 : Level} (P : UU-Prop l1) (Q : UU-Prop l2) →
   (P ⇔ Q) ≃ (type-Prop P ≃ type-Prop Q)
-equiv-equiv-iff P Q =
-  pair (equiv-iff' P Q) (is-equiv-equiv-iff P Q)
+pr1 (equiv-equiv-iff P Q) = equiv-iff' P Q
+pr2 (equiv-equiv-iff P Q) = is-equiv-equiv-iff P Q
 
 is-prop-is-contr-endomaps :
   {l : Level} (P : UU l) → is-contr (P → P) → is-prop P
@@ -967,7 +968,8 @@ is-prop-is-emb f =
 
 is-emb-Prop :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} → (A → B) → UU-Prop (l1 ⊔ l2)
-is-emb-Prop f = pair (is-emb f) (is-prop-is-emb f)
+pr1 (is-emb-Prop f) = is-emb f
+pr2 (is-emb-Prop f) = is-prop-is-emb f
 
 is-subtype-is-contr :
   {l : Level} → is-subtype {lsuc l} {A = UU l} is-contr
@@ -979,7 +981,8 @@ is-subtype-is-contr A =
         ( λ x → is-contr-Π (is-prop-is-contr is-contr-A x)))
 
 is-contr-Prop : {l : Level} → UU l → UU-Prop l
-is-contr-Prop A = pair (is-contr A) (is-subtype-is-contr A)
+pr1 (is-contr-Prop A) = is-contr A
+pr2 (is-contr-Prop A) = is-subtype-is-contr A
 
 is-prop-is-trunc :
   {l : Level} (k : 𝕋) (A : UU l) → is-prop (is-trunc k A)
@@ -988,21 +991,24 @@ is-prop-is-trunc (succ-𝕋 k) A =
   is-prop-Π (λ x → is-prop-Π (λ y → is-prop-is-trunc k (Id x y)))
 
 is-trunc-Prop : {l : Level} (k : 𝕋) (A : UU l) → UU-Prop l
-is-trunc-Prop k A = pair (is-trunc k A) (is-prop-is-trunc k A)
+pr1 (is-trunc-Prop k A) = is-trunc k A
+pr2 (is-trunc-Prop k A) = is-prop-is-trunc k A
 
 is-prop-is-prop :
   {l : Level} (A : UU l) → is-prop (is-prop A)
 is-prop-is-prop = is-prop-is-trunc neg-one-𝕋
 
 is-prop-Prop : {l : Level} (A : UU l) → UU-Prop l
-is-prop-Prop A = pair (is-prop A) (is-prop-is-prop A)
+pr1 (is-prop-Prop A) = is-prop A
+pr2 (is-prop-Prop A) = is-prop-is-prop A
 
 is-prop-is-set :
   {l : Level} (A : UU l) → is-prop (is-set A)
 is-prop-is-set = is-prop-is-trunc zero-𝕋
 
 is-set-Prop : {l : Level} → UU l → UU-Prop l
-is-set-Prop A = pair (is-set A) (is-prop-is-set A)
+pr1 (is-set-Prop A) = is-set A
+pr2 (is-set-Prop A) = is-prop-is-set A
 
 is-prop-is-trunc-map :
   (k : 𝕋) {l1 l2 : Level} {A : UU l1} {B : UU l2} (f : A → B) →
@@ -1020,15 +1026,18 @@ is-prop-is-prop-map f = is-prop-is-trunc-map neg-one-𝕋 f
 
 is-trunc-map-Prop :
   (k : 𝕋) {l1 l2 : Level} {A : UU l1} {B : UU l2} → (A → B) → UU-Prop (l1 ⊔ l2)
-is-trunc-map-Prop k f = pair (is-trunc-map k f) (is-prop-is-trunc-map k f)
+pr1 (is-trunc-map-Prop k f) = is-trunc-map k f
+pr2 (is-trunc-map-Prop k f) = is-prop-is-trunc-map k f
 
 is-contr-map-Prop :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} → (A → B) → UU-Prop (l1 ⊔ l2)
-is-contr-map-Prop f = pair (is-contr-map f) (is-prop-is-contr-map f)
+pr1 (is-contr-map-Prop f) = is-contr-map f
+pr2 (is-contr-map-Prop f) = is-prop-is-contr-map f
 
 is-prop-map-Prop :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} → (A → B) → UU-Prop (l1 ⊔ l2)
-is-prop-map-Prop f = pair (is-prop-map f) (is-prop-is-prop-map f)
+pr1 (is-prop-map-Prop f) = is-prop-map f
+pr2 (is-prop-map-Prop f) = is-prop-is-prop-map f
 
 equiv-is-equiv-is-contr-map :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} (f : A → B) →
@@ -1126,17 +1135,19 @@ module _
   is-equiv-ev-point-universal-property-contr a up-contr =
     up-contr A
 
+  -- !! This definition seems to cause a slowdown
   is-contr-is-equiv-ev-point :
     (a : A) → is-equiv (ev-point' a) → is-contr A
-  is-contr-is-equiv-ev-point a H =
-    pair a ( htpy-eq
-             ( ap
-               ( pr1)
-               ( eq-is-contr'
-                 ( is-contr-map-is-equiv H a)
-                 ( pair (λ x → a) refl)
-                 ( pair id refl))))
-
+  pr1 (is-contr-is-equiv-ev-point a H) = a
+  pr2 (is-contr-is-equiv-ev-point a H) =
+    htpy-eq
+      ( ap
+        ( pr1)
+        ( eq-is-contr'
+          ( is-contr-map-is-equiv H a)
+          ( pair (λ x → a) refl)
+          ( pair id refl)))
+  
   is-contr-universal-property-contr :
     (a : A) →
     ({l : Level} → universal-property-contr l a) → is-contr A
@@ -1172,10 +1183,9 @@ module _
 
   equiv-universal-property-contr :
     (a : A) → is-contr A → {l : Level} (X : UU l) → (A → X) ≃ X
-  equiv-universal-property-contr a H X =
-    pair
-      ( ev-point' a)
-      ( universal-property-contr-is-contr a H X)
+  pr1 (equiv-universal-property-contr a H X) = ev-point' a
+  pr2 (equiv-universal-property-contr a H X) =
+    universal-property-contr-is-contr a H X
 
   is-equiv-self-diagonal-is-equiv-diagonal :
     ({l : Level} (X : UU l) → is-equiv (λ x → const A X x)) →
@@ -1204,8 +1214,8 @@ module _
 
   equiv-diagonal-is-contr :
     {l : Level} (X : UU l) → is-contr A → X ≃ (A → X)
-  equiv-diagonal-is-contr X H =
-    pair (const A X) (is-equiv-diagonal-is-contr H X)
+  pr1 (equiv-diagonal-is-contr X H) = const A X
+  pr2 (equiv-diagonal-is-contr X H) = is-equiv-diagonal-is-contr H X
 
 ev-star :
   {l : Level} (P : unit → UU l) → ((x : unit) → P x) → P star
@@ -1225,12 +1235,14 @@ dependent-universal-property-unit =
 
 equiv-dependent-universal-property-unit :
   {l : Level} (P : unit → UU l) → ((x : unit) → P x) ≃ P star
-equiv-dependent-universal-property-unit P =
-  pair (ev-star P) (dependent-universal-property-unit P)
+pr1 (equiv-dependent-universal-property-unit P) = ev-star P
+pr2 (equiv-dependent-universal-property-unit P) =
+  dependent-universal-property-unit P
 
 equiv-ev-star :
   {l : Level} (P : unit → UU l) → ((x : unit) → P x) ≃ P star
-equiv-ev-star P = pair (ev-star P) (dependent-universal-property-unit P)
+pr1 (equiv-ev-star P) = ev-star P
+pr2 (equiv-ev-star P) = dependent-universal-property-unit P
 
 universal-property-unit :
   {l : Level} (Y : UU l) → is-equiv (ev-star' Y)
@@ -1238,12 +1250,13 @@ universal-property-unit Y = dependent-universal-property-unit (λ t → Y)
 
 equiv-universal-property-unit :
   {l : Level} (Y : UU l) → (unit → Y) ≃ Y
-equiv-universal-property-unit Y =
-  pair (ev-star' Y) (universal-property-unit Y)
+pr1 (equiv-universal-property-unit Y) = ev-star' Y
+pr2 (equiv-universal-property-unit Y) = universal-property-unit Y
 
 equiv-ev-star' :
   {l : Level} (Y : UU l) → (unit → Y) ≃ Y
-equiv-ev-star' Y = pair (ev-star' Y) (universal-property-unit Y)
+pr1 (equiv-ev-star' Y) = ev-star' Y
+pr2 (equiv-ev-star' Y) = universal-property-unit Y
 
 is-equiv-pt-is-contr :
   {l1 : Level} {X : UU l1} (x : X) →
@@ -1317,9 +1330,9 @@ module _
 
   dependent-universal-property-empty-is-empty :
     {l : Level} (H : is-empty A) → dependent-universal-property-empty l
-  dependent-universal-property-empty-is-empty {l} H P =
-    pair ( λ x → ex-falso (H x))
-         ( λ f → eq-htpy (λ x → ex-falso (H x)))
+  pr1 (dependent-universal-property-empty-is-empty {l} H P) x = ex-falso (H x)
+  pr2 (dependent-universal-property-empty-is-empty {l} H P) f =
+    eq-htpy (λ x → ex-falso (H x))
 
   universal-property-empty-is-empty :
     {l : Level} (H : is-empty A) → universal-property-empty l
@@ -1329,9 +1342,8 @@ module _
 
 dependent-universal-property-empty' :
   {l : Level} (P : empty → UU l) → is-contr ((x : empty) → P x)
-dependent-universal-property-empty' P =
-  pair ( ind-empty {P = P})
-       ( λ f → eq-htpy ind-empty)
+pr1 (dependent-universal-property-empty' P) ()
+pr2 (dependent-universal-property-empty' P) f = eq-htpy ind-empty
 
 all-elements-equal-coprod :
   {l1 l2 : Level} {P : UU l1} {Q : UU l2} →
@@ -1373,7 +1385,8 @@ is-set-type-Π-Set' A B =
 
 Π-Set' :
   {l1 l2 : Level} (A : UU l1) (B : A → UU-Set l2) → UU-Set (l1 ⊔ l2)
-Π-Set' A B = pair (type-Π-Set' A B) (is-set-type-Π-Set' A B)
+pr1 (Π-Set' A B) = type-Π-Set' A B
+pr2 (Π-Set' A B) = is-set-type-Π-Set' A B
 
 type-Π-Set :
   {l1 l2 : Level} (A : UU-Set l1) (B : type-Set A → UU-Set l2) → UU (l1 ⊔ l2)
@@ -1388,8 +1401,8 @@ is-set-type-Π-Set A B =
 Π-Set :
   {l1 l2 : Level} (A : UU-Set l1) →
   (type-Set A → UU-Set l2) → UU-Set (l1 ⊔ l2)
-Π-Set A B =
-  pair (type-Π-Set A B) (is-set-type-Π-Set A B)
+pr1 (Π-Set A B) = type-Π-Set A B
+pr2 (Π-Set A B) = is-set-type-Π-Set A B
 
 type-hom-Set :
   {l1 l2 : Level} → UU-Set l1 → UU-Set l2 → UU (l1 ⊔ l2)
@@ -1402,8 +1415,8 @@ is-set-type-hom-Set A B = is-set-function-type (is-set-type-Set B)
 
 hom-Set :
   {l1 l2 : Level} → UU-Set l1 → UU-Set l2 → UU-Set (l1 ⊔ l2)
-hom-Set A B =
-  pair (type-hom-Set A B) (is-set-type-hom-Set A B)
+pr1 (hom-Set A B) = type-hom-Set A B
+pr2 (hom-Set A B) = is-set-type-hom-Set A B
 
 is-equiv-inv-htpy :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2}
@@ -1417,7 +1430,8 @@ is-equiv-inv-htpy f g =
 equiv-inv-htpy :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2}
   (f g : (x : A) → B x) → (f ~ g) ≃ (g ~ f)
-equiv-inv-htpy f g = pair inv-htpy (is-equiv-inv-htpy f g)
+pr1 (equiv-inv-htpy f g) = inv-htpy
+pr2 (equiv-inv-htpy f g) = is-equiv-inv-htpy f g
 
 is-equiv-concat-htpy :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2}
@@ -1432,8 +1446,8 @@ equiv-concat-htpy :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2}
   {f g : (x : A) → B x} (H : f ~ g) (h : (x : A) → B x) →
   (g ~ h) ≃ (f ~ h)
-equiv-concat-htpy H h =
-  pair (concat-htpy H h) (is-equiv-concat-htpy H h)
+pr1 (equiv-concat-htpy H h) = concat-htpy H h
+pr2 (equiv-concat-htpy H h) = is-equiv-concat-htpy H h
 
 hom-slice :
   {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
@@ -1464,7 +1478,8 @@ module _
         ( triangle-hom-slice f g h'))
 
   refl-htpy-hom-slice : (h : hom-slice f g) → htpy-hom-slice h h
-  refl-htpy-hom-slice h = pair refl-htpy right-unit-htpy
+  pr1 (refl-htpy-hom-slice h) = refl-htpy
+  pr2 (refl-htpy-hom-slice h) = right-unit-htpy
   
   htpy-eq-hom-slice : (h h' : hom-slice f g) → Id h h' → htpy-hom-slice h h'
   htpy-eq-hom-slice h .h refl = refl-htpy-hom-slice h
@@ -1492,8 +1507,8 @@ module _
 
   equiv-htpy-eq-hom-slice :
     (h h' : hom-slice f g) → Id h h' ≃ htpy-hom-slice h h'
-  equiv-htpy-eq-hom-slice h h' =
-    pair (htpy-eq-hom-slice h h') (is-equiv-htpy-eq-hom-slice h h')
+  pr1 (equiv-htpy-eq-hom-slice h h') = htpy-eq-hom-slice h h'
+  pr2 (equiv-htpy-eq-hom-slice h h') = is-equiv-htpy-eq-hom-slice h h'
 
   eq-htpy-hom-slice :
     (h h' : hom-slice f g) → htpy-hom-slice h h' → Id h h'
@@ -1503,7 +1518,8 @@ fib-triangle :
   {i j k : Level} {X : UU i} {A : UU j} {B : UU k}
   (f : A → X) (g : B → X) (h : A → B) (H : f ~ (g ∘ h))
   (x : X) → (fib f x) → (fib g x)
-fib-triangle f g h H .(f a) (pair a refl) = pair (h a) (inv (H a))
+pr1 (fib-triangle f g h H .(f a) (pair a refl)) = h a
+pr2 (fib-triangle f g h H .(f a) (pair a refl)) = inv (H a)
 
 fib-triangle' :
   {i j k : Level} {X : UU i} {A : UU j} {B : UU k}
@@ -1596,10 +1612,8 @@ hom-slice-fiberwise-hom :
   {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
   (f : A → X) (g : B → X) →
   ((x : X) → (fib f x) → (fib g x)) → hom-slice f g
-hom-slice-fiberwise-hom f g α =
-  pair
-    ( λ a → pr1 (α (f a) (pair a refl)))
-    ( λ a → inv (pr2 (α (f a) (pair a refl))))
+pr1 (hom-slice-fiberwise-hom f g α) a = pr1 (α (f a) (pair a refl))
+pr2 (hom-slice-fiberwise-hom f g α) a = inv (pr2 (α (f a) (pair a refl)))
 
 issec-hom-slice-fiberwise-hom-eq-htpy :
   {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
@@ -1636,8 +1650,8 @@ equiv-fiberwise-hom-hom-slice :
   {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
   (f : A → X) (g : B → X) →
   hom-slice f g ≃ ((x : X) → fib f x → fib g x)
-equiv-fiberwise-hom-hom-slice f g =
-  pair (fiberwise-hom-hom-slice f g) (is-equiv-fiberwise-hom-hom-slice f g)
+pr1 (equiv-fiberwise-hom-hom-slice f g) = fiberwise-hom-hom-slice f g
+pr2 (equiv-fiberwise-hom-hom-slice f g) = is-equiv-fiberwise-hom-hom-slice f g
 
 is-equiv-hom-slice-fiberwise-hom :
   {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
@@ -1653,8 +1667,8 @@ equiv-hom-slice-fiberwise-hom :
   {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
   (f : A → X) (g : B → X) →
   ((x : X) → fib f x → fib g x) ≃ hom-slice f g
-equiv-hom-slice-fiberwise-hom f g =
-  pair (hom-slice-fiberwise-hom f g) (is-equiv-hom-slice-fiberwise-hom f g)
+pr1 (equiv-hom-slice-fiberwise-hom f g) = hom-slice-fiberwise-hom f g
+pr2 (equiv-hom-slice-fiberwise-hom f g) = is-equiv-hom-slice-fiberwise-hom f g
 
 equiv-slice :
   {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
@@ -1665,7 +1679,8 @@ hom-equiv-slice :
   {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
   (f : A → X) (g : B → X) →
   equiv-slice f g → hom-slice f g
-hom-equiv-slice f g e = pair (pr1 (pr1 e)) (pr2 e)
+pr1 (hom-equiv-slice f g e) = pr1 (pr1 e)
+pr2 (hom-equiv-slice f g e) = pr2 e
 
 is-equiv-subtype-is-equiv :
   {l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2}
@@ -1767,9 +1782,9 @@ equiv-fiberwise-equiv-equiv-slice :
   {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
   (f : A → X) (g : B → X) →
   equiv-slice f g ≃ Σ ((x : X) → (fib f x) → (fib g x)) is-fiberwise-equiv
-equiv-fiberwise-equiv-equiv-slice f g =
-  pair ( fiberwise-equiv-equiv-slice f g)
-       ( is-equiv-fiberwise-equiv-equiv-slice f g)
+pr1 (equiv-fiberwise-equiv-equiv-slice f g) = fiberwise-equiv-equiv-slice f g
+pr2 (equiv-fiberwise-equiv-equiv-slice f g) =
+  is-equiv-fiberwise-equiv-equiv-slice f g
 
 equiv-fam-equiv-equiv-slice :
   {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} {B : UU l3}
@@ -1825,8 +1840,8 @@ reduce-Π-fib' :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f : A → B) →
   (C : (y : B) (z : fib f y) → UU l3) →
   ((y : B) (z : fib f y) → C y z) ≃ ((x : A) → C (f x) (pair x refl))
-reduce-Π-fib' f C =
-  pair (map-reduce-Π-fib f C) (is-equiv-map-reduce-Π-fib f C)
+pr1 (reduce-Π-fib' f C) = map-reduce-Π-fib f C
+pr2 (reduce-Π-fib' f C) = is-equiv-map-reduce-Π-fib f C
 
 reduce-Π-fib :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f : A → B) →
@@ -1924,10 +1939,9 @@ is-equiv-postcomp-is-equiv {X = X} {Y = Y} f is-equiv-f A =
 equiv-postcomp :
   {l1 l2 l3 : Level} {X : UU l1} {Y : UU l2} (A : UU l3) →
   (X ≃ Y) → (A → X) ≃ (A → Y)
-equiv-postcomp A e =
-  pair
-    ( postcomp A (map-equiv e))
-    ( is-equiv-postcomp-is-equiv (map-equiv e) (is-equiv-map-equiv e) A)
+pr1 (equiv-postcomp A e) = postcomp A (map-equiv e)
+pr2 (equiv-postcomp A e) =
+  is-equiv-postcomp-is-equiv (map-equiv e) (is-equiv-map-equiv e) A
 
 is-emb-postcomp-is-emb :
   {l1 l2 l3 : Level} (A : UU l3) {X : UU l1} {Y : UU l2} (f : X → Y) →
@@ -1953,4 +1967,5 @@ is-prop-leq-ℕ (succ-ℕ m) zero-ℕ = is-prop-empty
 is-prop-leq-ℕ (succ-ℕ m) (succ-ℕ n) = is-prop-leq-ℕ m n
 
 leq-ℕ-Prop : ℕ → ℕ → UU-Prop lzero
-leq-ℕ-Prop m n = pair (leq-ℕ m n) (is-prop-leq-ℕ m n)
+pr1 (leq-ℕ-Prop m n) = leq-ℕ m n
+pr2 (leq-ℕ-Prop m n) = is-prop-leq-ℕ m n

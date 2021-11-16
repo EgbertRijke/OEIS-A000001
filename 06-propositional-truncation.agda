@@ -2,7 +2,7 @@
 
 module 06-propositional-truncation where
 
-open import 05-function-extensionality
+open import 05-function-extensionality public
 
 precomp-Prop :
   { l1 l2 l3 : Level} {A : UU l1} (P : UU-Prop l2) →
