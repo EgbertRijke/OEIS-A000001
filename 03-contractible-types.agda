@@ -12,7 +12,7 @@ is-contr A = Σ A (λ a → (x : A) → Id a x)
 
 center :
   {l : Level} {A : UU l} → is-contr A → A
-center (pair c is-contr-A) = c
+center = pr1
 
 eq-is-contr' :
   {l : Level} {A : UU l} → is-contr A → (x y : A) → Id x y
@@ -55,7 +55,8 @@ comp-singleton-is-contr a is-contr-A B b =
 is-contr-ind-singleton :
   {i : Level} (A : UU i) (a : A) →
   ({l : Level} (P : A → UU l) → P a → (x : A) → P x) → is-contr A
-is-contr-ind-singleton A a S = pair a (S (λ x → Id a x) refl)
+pr1 (is-contr-ind-singleton A a S) = a
+pr2 (is-contr-ind-singleton A a S) = S (λ x → Id a x) refl
 
 is-contr-is-singleton :
   {i : Level} (A : UU i) (a : A) →
@@ -64,13 +65,14 @@ is-contr-is-singleton A a S = is-contr-ind-singleton A a (λ P → pr1 (S P))
 
 is-singleton-is-contr :
   {l1 l2 : Level} {A : UU l1} (a : A) → is-contr A → is-singleton l2 A a
-is-singleton-is-contr a is-contr-A B =
-  pair
-    ( ind-singleton-is-contr a is-contr-A B)
-    ( comp-singleton-is-contr a is-contr-A B)
+pr1 (is-singleton-is-contr a is-contr-A B) =
+  ind-singleton-is-contr a is-contr-A B
+pr2 (is-singleton-is-contr a is-contr-A B) =
+  comp-singleton-is-contr a is-contr-A B
 
 is-singleton-unit : {l : Level} → is-singleton l unit star
-is-singleton-unit B = pair ind-unit (λ b → refl)
+pr1 (is-singleton-unit B) = ind-unit
+pr2 (is-singleton-unit B) b = refl
 
 is-contr-unit : is-contr unit
 is-contr-unit = is-contr-is-singleton unit star (is-singleton-unit)
@@ -78,7 +80,8 @@ is-contr-unit = is-contr-is-singleton unit star (is-singleton-unit)
 is-singleton-total-path :
   {i l : Level} (A : UU i) (a : A) →
   is-singleton l (Σ A (λ x → Id a x)) (pair a refl)
-is-singleton-total-path A a B = pair (ind-Σ ∘ (ind-Id a _)) (λ b → refl)
+pr1 (is-singleton-total-path A a B) = ind-Σ ∘ (ind-Id a _)
+pr2 (is-singleton-total-path A a B) = refl-htpy
 
 is-contr-total-path :
   {i : Level} {A : UU i} (a : A) → is-contr (Σ A (λ x → Id a x))
@@ -165,10 +168,10 @@ coh-inv-is-coherently-invertible H = pr2 (pr2 (pr2 H))
 center-fib-is-coherently-invertible :
   {i j : Level} {A : UU i} {B : UU j} {f : A → B} →
   is-coherently-invertible f → (y : B) → fib f y
-center-fib-is-coherently-invertible {i} {j} {A} {B} {f} H y =
-  pair
-    ( inv-is-coherently-invertible H y)
-    ( issec-inv-is-coherently-invertible H y)
+pr1 (center-fib-is-coherently-invertible {i} {j} {A} {B} {f} H y) =
+  inv-is-coherently-invertible H y
+pr2 (center-fib-is-coherently-invertible {i} {j} {A} {B} {f} H y) =
+  issec-inv-is-coherently-invertible H y
 
 Eq-fib :
   {i j : Level} {A : UU i} {B : UU j} (f : A → B) (y : B) →
@@ -179,7 +182,8 @@ Eq-fib f y s t =
 reflexive-Eq-fib :
   {i j : Level} {A : UU i} {B : UU j} (f : A → B) (y : B) →
   (s : fib f y) → Eq-fib f y s s
-reflexive-Eq-fib f y s = pair refl refl
+pr1 (reflexive-Eq-fib f y s) = refl
+pr2 (reflexive-Eq-fib f y s) = refl
 
 Eq-fib-eq :
   {i j : Level} {A : UU i} {B : UU j} (f : A → B) (y : B) →
@@ -205,10 +209,10 @@ contraction-fib-is-coherently-invertible {f = f} H y (pair x refl) =
 is-contr-map-is-coherently-invertible : 
   {i j : Level} {A : UU i} {B : UU j} {f : A → B} →
   is-coherently-invertible f → is-contr-map f
-is-contr-map-is-coherently-invertible H y =
-  pair
-    ( center-fib-is-coherently-invertible H y)
-    ( contraction-fib-is-coherently-invertible H y)
+pr1 (is-contr-map-is-coherently-invertible H y) =
+  center-fib-is-coherently-invertible H y
+pr2 (is-contr-map-is-coherently-invertible H y) =
+  contraction-fib-is-coherently-invertible H y
 
 htpy-nat :
   {i j : Level} {A : UU i} {B : UU j} {f g : A → B} (H : f ~ g)
@@ -267,14 +271,11 @@ module _
           ( htpy-nat (htpy-right-whisk (pr1 (pr2 H)) f) (pr2 (pr2 H) x))))
 
   is-coherently-invertible-has-inverse : is-coherently-invertible f
-  is-coherently-invertible-has-inverse =
-    pair
-      ( inv-has-inverse)
-      ( pair
-        ( issec-inv-has-inverse)
-        ( pair
-          ( isretr-inv-has-inverse)
-          ( coherence-inv-has-inverse)))
+  pr1 is-coherently-invertible-has-inverse = inv-has-inverse
+  pr1 (pr2 is-coherently-invertible-has-inverse) = issec-inv-has-inverse
+  pr1 (pr2 (pr2 is-coherently-invertible-has-inverse)) = isretr-inv-has-inverse
+  pr2 (pr2 (pr2 is-coherently-invertible-has-inverse)) =
+    coherence-inv-has-inverse
 
 is-contr-map-is-equiv :
   {i j : Level} {A : UU i} {B : UU j} {f : A → B} →
@@ -322,15 +323,18 @@ module _
 
 is-contr-is-equiv-const :
   {i : Level} {A : UU i} → is-equiv (terminal-map {A = A}) → is-contr A
-is-contr-is-equiv-const (pair (pair g issec) (pair h isretr)) =
-  pair (h star) isretr
+pr1 (is-contr-is-equiv-const (pair (pair g issec) (pair h isretr))) = h star
+pr2 (is-contr-is-equiv-const (pair (pair g issec) (pair h isretr))) = isretr
 
 is-equiv-terminal-map-is-contr :
   {i : Level} {A : UU i} → is-contr A → is-equiv (terminal-map {A = A})
-is-equiv-terminal-map-is-contr {i} {A} is-contr-A =
-  pair
-    ( pair (ind-unit (center is-contr-A)) (ind-unit refl))
-    ( pair (const unit A (center is-contr-A)) (contraction is-contr-A))
+pr1 (pr1 (is-equiv-terminal-map-is-contr {i} {A} is-contr-A)) =
+  ind-unit (center is-contr-A)
+pr2 (pr1 (is-equiv-terminal-map-is-contr {i} {A} is-contr-A)) = ind-unit refl
+pr1 (pr2 (is-equiv-terminal-map-is-contr {i} {A} is-contr-A)) =
+  const unit A (center is-contr-A)
+pr2 (pr2 (is-equiv-terminal-map-is-contr {i} {A} is-contr-A)) =
+  contraction is-contr-A
 
 is-contr-is-equiv :
   {i j : Level} {A : UU i} (B : UU j) (f : A → B) →
@@ -365,11 +369,10 @@ is-equiv-is-contr {i} {j} {A} {B} f is-contr-A is-contr-B =
 equiv-is-contr :
   {i j : Level} {A : UU i} {B : UU j} →
   is-contr A → is-contr B → A ≃ B
-equiv-is-contr is-contr-A is-contr-B =
-  pair
-    ( λ a → center is-contr-B)
-    ( is-equiv-is-contr _ is-contr-A is-contr-B)
-    
+pr1 (equiv-is-contr is-contr-A is-contr-B) a = center is-contr-B
+pr2 (equiv-is-contr is-contr-A is-contr-B) =
+  is-equiv-is-contr _ is-contr-A is-contr-B
+ 
 is-contr-equiv :
   {i j : Level} {A : UU i} (B : UU j) (e : A ≃ B) → is-contr B → is-contr A
 is-contr-equiv B (pair e is-equiv-e) is-contr-B =
@@ -387,10 +390,9 @@ contraction-is-prop-is-contr (pair c C) {x} refl = left-inv (C x)
 
 is-prop-is-contr : {i : Level} {A : UU i} → is-contr A →
   (x y : A) → is-contr (Id x y)
-is-prop-is-contr {i} {A} is-contr-A x y =
-  pair
-    ( eq-is-contr is-contr-A)
-    ( contraction-is-prop-is-contr is-contr-A)
+pr1 (is-prop-is-contr {i} {A} is-contr-A x y) = eq-is-contr is-contr-A
+pr2 (is-prop-is-contr {i} {A} is-contr-A x y) =
+  contraction-is-prop-is-contr is-contr-A
 
 is-contr-raise-unit :
   {l1 : Level} → is-contr (raise-unit l1)
@@ -428,8 +430,8 @@ is-equiv-map-fib-pr1 B a =
 
 equiv-fib-pr1 :
   {i j : Level} {A : UU i} {B : A → UU j} (a : A) → fib (pr1 {B = B}) a ≃ B a
-equiv-fib-pr1 {B = B} a =
-  pair (map-fib-pr1 B a) (is-equiv-map-fib-pr1 B a)
+pr1 (equiv-fib-pr1 {B = B} a) = map-fib-pr1 B a
+pr2 (equiv-fib-pr1 {B = B} a) = is-equiv-map-fib-pr1 B a
 
 map-equiv-total-fib :
   {i j : Level} {A : UU i} {B : UU j} (f : A → B) → (Σ B (fib f)) → A
@@ -442,7 +444,9 @@ triangle-map-equiv-total-fib f t = inv (pr2 (pr2 t))
 
 map-inv-equiv-total-fib :
   {i j : Level} {A : UU i} {B : UU j} (f : A → B) → A → Σ B (fib f)
-map-inv-equiv-total-fib f x = pair (f x) (pair x refl)
+pr1 (map-inv-equiv-total-fib f x) = f x
+pr1 (pr2 (map-inv-equiv-total-fib f x)) = x
+pr2 (pr2 (map-inv-equiv-total-fib f x)) = refl
 
 isretr-map-inv-equiv-total-fib :
   {i j : Level} {A : UU i} {B : UU j} (f : A → B) →
@@ -474,13 +478,13 @@ is-equiv-map-inv-equiv-total-fib f =
 
 equiv-total-fib :
   {i j : Level} {A : UU i} {B : UU j} (f : A → B ) → Σ B (fib f) ≃ A
-equiv-total-fib f =
-  pair (map-equiv-total-fib f) (is-equiv-map-equiv-total-fib f)
+pr1 (equiv-total-fib f) = map-equiv-total-fib f
+pr2 (equiv-total-fib f) = is-equiv-map-equiv-total-fib f
 
 inv-equiv-total-fib :
   {i j : Level} {A : UU i} {B : UU j} (f : A → B) → A ≃ Σ B (fib f)
-inv-equiv-total-fib f =
-  pair (map-inv-equiv-total-fib f) (is-equiv-map-inv-equiv-total-fib f)
+pr1 (inv-equiv-total-fib f) = map-inv-equiv-total-fib f
+pr2 (inv-equiv-total-fib f) = is-equiv-map-inv-equiv-total-fib f
 
 is-equiv-pr1-is-contr :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} →
@@ -495,7 +499,8 @@ is-equiv-pr1-is-contr {B = B} is-contr-B =
 equiv-pr1 :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} →
   ((a : A) → is-contr (B a)) → (Σ A B) ≃ A
-equiv-pr1 is-contr-B = pair pr1 (is-equiv-pr1-is-contr is-contr-B)
+pr1 (equiv-pr1 is-contr-B) = pr1
+pr2 (equiv-pr1 is-contr-B) = is-equiv-pr1-is-contr is-contr-B
 
 right-unit-law-Σ-is-contr :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} →
@@ -528,13 +533,14 @@ is-equiv-map-inv-fib-pr1 B a =
 inv-equiv-fib-pr1 :
   {i j : Level} {A : UU i} (B : A → UU j) (a : A) →
   B a ≃ fib (pr1 {B = B}) a
-inv-equiv-fib-pr1 B a =
-  pair (map-inv-fib-pr1 B a) (is-equiv-map-inv-fib-pr1 B a)
+pr1 (inv-equiv-fib-pr1 B a) = map-inv-fib-pr1 B a
+pr2 (inv-equiv-fib-pr1 B a) = is-equiv-map-inv-fib-pr1 B a
 
 map-section :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} →
   ((x : A) → B x) → (A → Σ A B)
-map-section b a = pair a (b a)
+pr1 (map-section b a) = a
+pr2 (map-section b a) = b a
 
 htpy-map-section :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} (b : (x : A) → B x) →
@@ -556,7 +562,8 @@ is-equiv-map-section b C =
 equiv-section :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} (b : (x : A) → B x) →
   ((x : A) → is-contr (B x)) → A ≃ Σ A B
-equiv-section b C = pair (map-section b) (is-equiv-map-section b C)
+pr1 (equiv-section b C) = map-section b
+pr2 (equiv-section b C) = is-equiv-map-section b C
 
 is-contr-fam-is-equiv-map-section :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} (b : (x : A) → B x) →
@@ -569,10 +576,12 @@ is-contr-fam-is-equiv-map-section b H =
       ( is-equiv-id)
       ( H))
 
+-- !! this one potentially causes a slowdown
 tot :
   {i j k : Level} {A : UU i} {B : A → UU j} {C : A → UU k} →
   ((x : A) → B x → C x) → ( Σ A B → Σ A C)
-tot f t = pair (pr1 t) (f (pr1 t) (pr2 t))
+pr1 (tot f t) = pr1 t
+pr2 (tot f t) = f (pr1 t) (pr2 t)
 
 tot-htpy :
   {i j k : Level} {A : UU i} {B : A → UU j} {C : A → UU k}
@@ -595,13 +604,16 @@ fib-ftr-fib-tot :
   {i j k : Level} {A : UU i} {B : A → UU j} {C : A → UU k} →
   (f : (x : A) → B x → C x) → (t : Σ A C) →
   fib (tot f) t → fib (f (pr1 t)) (pr2 t)
-fib-ftr-fib-tot f .(pair x (f x y)) (pair (pair x y) refl) = pair y refl
+pr1 (fib-ftr-fib-tot f .(tot f (pair x y)) (pair (pair x y) refl)) = y
+pr2 (fib-ftr-fib-tot f .(tot f (pair x y)) (pair (pair x y) refl)) = refl
 
 fib-tot-fib-ftr :
   {i j k : Level} {A : UU i} {B : A → UU j} {C : A → UU k} →
   (f : (x : A) → B x → C x) → (t : Σ A C) →
   fib (f (pr1 t)) (pr2 t) → fib (tot f) t
-fib-tot-fib-ftr F (pair a .(F a y)) (pair y refl) = pair (pair a y) refl
+pr1 (pr1 (fib-tot-fib-ftr F (pair a .(F a y)) (pair y refl))) = a
+pr2 (pr1 (fib-tot-fib-ftr F (pair a .(F a y)) (pair y refl))) = y
+pr2 (fib-tot-fib-ftr F (pair a .(F a y)) (pair y refl)) = refl
 
 issec-fib-tot-fib-ftr :
   {i j k : Level} {A : UU i} {B : A → UU j} {C : A → UU k} →
@@ -666,10 +678,9 @@ is-fiberwise-equiv-is-equiv-tot {A = A} {B} {C} f is-equiv-tot-f x =
 equiv-tot :
   {i j k : Level} {A : UU i} {B : A → UU j} {C : A → UU k} →
   ((x : A) → B x ≃ C x) → (Σ A B) ≃ (Σ A C)
-equiv-tot e =
-  pair
-    ( tot (λ x → map-equiv (e x)))
-    ( is-equiv-tot-is-fiberwise-equiv (λ x → is-equiv-map-equiv (e x)))
+pr1 (equiv-tot e) = tot (λ x → map-equiv (e x))
+pr2 (equiv-tot e) =
+  is-equiv-tot-is-fiberwise-equiv (λ x → is-equiv-map-equiv (e x))
 
 fundamental-theorem-id :
   {i j : Level} {A : UU i} {B : A → UU j} (a : A) (b : B a) →
@@ -708,7 +719,8 @@ is-emb-map-emb f = pr2 f
 equiv-ap-emb :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} (e : A ↪ B) {x y : A} →
   Id x y ≃ Id (map-emb e x) (map-emb e y)
-equiv-ap-emb e {x} {y} = pair (ap (map-emb e)) (is-emb-map-emb e x y)
+pr1 (equiv-ap-emb e {x} {y}) = ap (map-emb e)
+pr2 (equiv-ap-emb e {x} {y}) = is-emb-map-emb e x y
 
 is-injective-is-emb : {l1 l2 : Level} {A : UU l1} {B : UU l2} {f : A → B} →
   is-emb f → is-injective f
@@ -730,8 +742,8 @@ is-emb-is-equiv {i} {j} {A} {B} {f} is-equiv-f x =
 
 emb-equiv :
   {i j : Level} {A : UU i} {B : UU j} → (A ≃ B) → (A ↪ B)
-emb-equiv e =
-  pair (map-equiv e) (is-emb-is-equiv (is-equiv-map-equiv e))
+pr1 (emb-equiv e) = map-equiv e
+pr2 (emb-equiv e) = is-emb-is-equiv (is-equiv-map-equiv e)
 
 emb-id :
   {i : Level} {A : UU i} → (A ↪ A)
@@ -743,17 +755,15 @@ is-emb-id = is-emb-map-emb emb-id
 equiv-ap :
   {i j : Level} {A : UU i} {B : UU j} (e : A ≃ B) (x y : A) →
   (Id x y) ≃ (Id (map-equiv e x) (map-equiv e y))
-equiv-ap e x y =
-  pair
-    ( ap (map-equiv e) {x} {y})
-    ( is-emb-is-equiv (is-equiv-map-equiv e) x y)
+pr1 (equiv-ap e x y) = ap (map-equiv e) {x} {y}
+pr2 (equiv-ap e x y) = is-emb-is-equiv (is-equiv-map-equiv e) x y
 
 is-contr-retract-of : {i j : Level} {A : UU i} (B : UU j) →
   A retract-of B → is-contr B → is-contr A
-is-contr-retract-of B (pair i (pair r isretr)) is-contr-B =
-  pair
-    ( r (center is-contr-B))
-    ( λ x → (ap r (contraction is-contr-B (i x))) ∙ (isretr x))
+pr1 (is-contr-retract-of B (pair i (pair r isretr)) is-contr-B) =
+  r (center is-contr-B)
+pr2 (is-contr-retract-of B (pair i (pair r isretr)) is-contr-B) x =
+  (ap r (contraction is-contr-B (i x))) ∙ (isretr x)
 
 is-contr-left-factor-prod :
   {i j : Level} (A : UU i) (B : UU j) → is-contr (A × B) → is-contr A
@@ -777,12 +787,12 @@ is-contr-right-factor-prod A B is-contr-AB =
 is-contr-prod :
   {i j : Level} {A : UU i} {B : UU j} →
   is-contr A → is-contr B → is-contr (A × B)
-is-contr-prod {A = A} {B = B} (pair a C) (pair b D) =
-  pair (pair a b) α
-  where
-  α : (z : A × B) → Id (pair a b) z
-  α (pair x y) = eq-pair (C x) (D y)
+pr1 (pr1 (is-contr-prod {A = A} {B = B} (pair a C) (pair b D))) = a
+pr2 (pr1 (is-contr-prod {A = A} {B = B} (pair a C) (pair b D))) = b
+pr2 (is-contr-prod {A = A} {B = B} (pair a C) (pair b D)) (pair x y) =
+  eq-pair (C x) (D y)
 
+-- !! I stopped here.
 map-inv-left-unit-law-Σ-is-contr :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} → is-contr A → (a : A) →
   B a → Σ A B

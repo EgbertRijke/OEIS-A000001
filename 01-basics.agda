@@ -105,8 +105,13 @@ mul-ℕ : ℕ → (ℕ → ℕ)
 mul-ℕ zero-ℕ n = zero-ℕ
 mul-ℕ (succ-ℕ m) n = add-ℕ (mul-ℕ m n) n
 
-data Σ {l1 l2 : Level} (A : UU l1) (B : A → UU l2) : UU (l1 ⊔ l2) where
-  pair : (x : A) → (B x → Σ A B)
+record Σ {l1 l2} (A : UU l1) (B : A → UU l2) : UU (l1 ⊔ l2) where
+  constructor pair
+  field
+    pr1 : A
+    pr2 : B pr1
+
+open Σ public
 
 ind-Σ :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {C : Σ A B → UU l3} →
@@ -117,12 +122,6 @@ ev-pair :
   {l1 l2 l3 : Level} {A : UU l1} {B : A → UU l2} {C : Σ A B → UU l3} →
   ((t : Σ A B) → C t) → (x : A) (y : B x) → C (pair x y)
 ev-pair f x y = f (pair x y)
-
-pr1 : {l1 l2 : Level} {A : UU l1} {B : A → UU l2} → Σ A B → A
-pr1 (pair a _) = a
-
-pr2 : {l1 l2 : Level} {A : UU l1} {B : A → UU l2} → (t : Σ A B) → B (pr1 t)
-pr2 (pair a b) = b
 
 prod : {l1 l2 : Level} (A : UU l1) (B : UU l2) → UU (l1 ⊔ l2)
 prod A B = Σ A (λ a → B)
@@ -551,14 +550,22 @@ well-ordering-principle-succ-ℕ :
   (n : ℕ) (p : P (succ-ℕ n)) →
   is-decidable (P zero-ℕ) →
   minimal-element-ℕ (λ m → P (succ-ℕ m)) → minimal-element-ℕ P
-well-ordering-principle-succ-ℕ P d n p (inl p0) _ =
-  pair zero-ℕ (pair p0 (λ m q → leq-zero-ℕ m))
-well-ordering-principle-succ-ℕ P d n p
-  (inr neg-p0) (pair m (pair pm is-min-m)) =
-  pair
-    ( succ-ℕ m)
-    ( pair pm
-      ( is-minimal-element-succ-ℕ P d m pm is-min-m neg-p0))
+pr1 ( well-ordering-principle-succ-ℕ P d n p (inl p0) _) = zero-ℕ
+pr1 ( pr2 (well-ordering-principle-succ-ℕ P d n p (inl p0) _)) = p0
+pr2 ( pr2 (well-ordering-principle-succ-ℕ P d n p (inl p0) _)) m q =
+  leq-zero-ℕ m
+pr1 ( well-ordering-principle-succ-ℕ P d n p
+      ( inr neg-p0)
+      ( pair m (pair pm is-min-m))) = succ-ℕ m
+pr1 ( pr2
+      ( well-ordering-principle-succ-ℕ P d n p
+        ( inr neg-p0)
+        ( pair m (pair pm is-min-m)))) = pm
+pr2 ( pr2
+      ( well-ordering-principle-succ-ℕ P d n p
+        ( inr neg-p0)
+        ( pair m (pair pm is-min-m)))) =
+  is-minimal-element-succ-ℕ P d m pm is-min-m neg-p0
 
 well-ordering-principle-ℕ :
   {l : Level} (P : ℕ → UU l) (d : is-decidable-fam P) →
@@ -764,8 +771,9 @@ dist-eq-ℕ m .m refl = dist-eq-ℕ' m
 
 refl-cong-ℕ :
   (k x : ℕ) → cong-ℕ k x x
-refl-cong-ℕ k x =
-  pair zero-ℕ ((left-zero-law-mul-ℕ (succ-ℕ k)) ∙ (inv (dist-eq-ℕ x x refl)))
+pr1 (refl-cong-ℕ k x) = zero-ℕ
+pr2 (refl-cong-ℕ k x) =
+  left-zero-law-mul-ℕ (succ-ℕ k) ∙ inv (dist-eq-ℕ x x refl)
 
 cong-identification-ℕ :
   (k : ℕ) {x y : ℕ} → Id x y → cong-ℕ k x y
@@ -926,11 +934,9 @@ right-distributive-mul-add-ℕ x y z =
 
 div-add-ℕ :
   (d x y : ℕ) → div-ℕ d x → div-ℕ d y → div-ℕ d (add-ℕ x y)
-div-add-ℕ d x y (pair n p) (pair m q) =
-  pair
-    ( add-ℕ n m)
-    ( ( right-distributive-mul-add-ℕ n m d) ∙
-      ( ap-add-ℕ p q))
+pr1 (div-add-ℕ d x y (pair n p) (pair m q)) = add-ℕ n m
+pr2 (div-add-ℕ d x y (pair n p) (pair m q)) =
+  right-distributive-mul-add-ℕ n m d ∙ ap-add-ℕ p q
 
 is-injective-add-ℕ' : (k : ℕ) → is-injective (add-ℕ' k)
 is-injective-add-ℕ' zero-ℕ = id
@@ -991,27 +997,26 @@ leq-leq-mul-ℕ' m n x H =
 
 div-left-summand-ℕ :
   (d x y : ℕ) → div-ℕ d y → div-ℕ d (add-ℕ x y) → div-ℕ d x
-div-left-summand-ℕ zero-ℕ x y (pair m q) (pair n p) =
-  pair zero-ℕ
-    ( ( inv (right-zero-law-mul-ℕ n)) ∙
-      ( p ∙ (ap (add-ℕ x) ((inv q) ∙ (right-zero-law-mul-ℕ m)))))
-div-left-summand-ℕ (succ-ℕ d) x y (pair m q) (pair n p) =
-  pair
-    ( dist-ℕ m n)
-    ( is-injective-add-ℕ' (mul-ℕ m (succ-ℕ d))
-      ( ( inv
-          ( ( right-distributive-mul-add-ℕ m (dist-ℕ m n) (succ-ℕ d)) ∙
-            ( commutative-add-ℕ
-              ( mul-ℕ m (succ-ℕ d))
-              ( mul-ℕ (dist-ℕ m n) (succ-ℕ d))))) ∙ 
-        ( ( ap
-            ( mul-ℕ' (succ-ℕ d))
-            ( is-additive-right-inverse-dist-ℕ m n
-              ( leq-leq-mul-ℕ' m n d
-                ( concatenate-eq-leq-eq-ℕ q
-                  ( leq-add-ℕ' y x)
-                  ( inv p))))) ∙
-          ( p ∙ (ap (add-ℕ x) (inv q))))))
+pr1 (div-left-summand-ℕ zero-ℕ x y (pair m q) (pair n p)) = zero-ℕ
+pr2 (div-left-summand-ℕ zero-ℕ x y (pair m q) (pair n p)) =
+  ( inv (right-zero-law-mul-ℕ n)) ∙
+  ( p ∙ (ap (add-ℕ x) ((inv q) ∙ (right-zero-law-mul-ℕ m))))
+pr1 (div-left-summand-ℕ (succ-ℕ d) x y (pair m q) (pair n p)) = dist-ℕ m n
+pr2 (div-left-summand-ℕ (succ-ℕ d) x y (pair m q) (pair n p)) =
+  is-injective-add-ℕ' (mul-ℕ m (succ-ℕ d))
+    ( ( inv
+        ( ( right-distributive-mul-add-ℕ m (dist-ℕ m n) (succ-ℕ d)) ∙
+          ( commutative-add-ℕ
+            ( mul-ℕ m (succ-ℕ d))
+            ( mul-ℕ (dist-ℕ m n) (succ-ℕ d))))) ∙ 
+      ( ( ap
+          ( mul-ℕ' (succ-ℕ d))
+          ( is-additive-right-inverse-dist-ℕ m n
+            ( leq-leq-mul-ℕ' m n d
+              ( concatenate-eq-leq-eq-ℕ q
+                ( leq-add-ℕ' y x)
+                ( inv p))))) ∙
+        ( p ∙ (ap (add-ℕ x) (inv q)))))
 
 div-right-summand-ℕ :
   (d x y : ℕ) → div-ℕ d x → div-ℕ d (add-ℕ x y) → div-ℕ d y
@@ -1060,8 +1065,8 @@ concatenate-eq-cong-ℕ k refl H = H
 
 symm-cong-ℕ :
   (k x y : ℕ) → cong-ℕ k x y → cong-ℕ k y x
-symm-cong-ℕ k x y (pair d p) =
-  pair d (p ∙ (symmetric-dist-ℕ x y))
+pr1 (symm-cong-ℕ k x y (pair d p)) = d
+pr2 (symm-cong-ℕ k x y (pair d p)) = p ∙ symmetric-dist-ℕ x y
 
 right-unit-law-mul-ℕ :
   (x : ℕ) → Id (mul-ℕ x one-ℕ) x
@@ -1085,13 +1090,12 @@ right-unit-law-dist-ℕ (succ-ℕ n) = refl
 
 cong-zero-ℕ :
   (k : ℕ) → cong-ℕ k k zero-ℕ
-cong-zero-ℕ k =
-  pair one-ℕ ((left-unit-law-mul-ℕ k) ∙ (inv (right-unit-law-dist-ℕ k)))
+pr1 (cong-zero-ℕ k) = one-ℕ
+pr2 (cong-zero-ℕ k) = left-unit-law-mul-ℕ k ∙ inv (right-unit-law-dist-ℕ k)
 
 cong-zero-ℕ' :
   (k : ℕ) → cong-ℕ k zero-ℕ k
-cong-zero-ℕ' k =
-  symm-cong-ℕ k k zero-ℕ (cong-zero-ℕ k)
+cong-zero-ℕ' k = symm-cong-ℕ k k zero-ℕ (cong-zero-ℕ k)
 
 cong-nat-succ-Fin :
   (k : ℕ) (x : Fin k) → cong-ℕ k (nat-Fin (succ-Fin x)) (succ-ℕ (nat-Fin x))
@@ -1207,7 +1211,8 @@ right-unit-law-mul-Fin x =
   ( left-unit-law-mul-Fin x)
 
 refl-div-Fin : {k : ℕ} (x : Fin k) → div-Fin x x
-refl-div-Fin {succ-ℕ k} x = pair one-Fin (left-unit-law-mul-Fin x)
+pr1 (refl-div-Fin {succ-ℕ k} x) = one-Fin
+pr2 (refl-div-Fin {succ-ℕ k} x) = left-unit-law-mul-Fin x
 
 associative-mul-ℕ :
   (x y z : ℕ) → Id (mul-ℕ (mul-ℕ x y) z) (mul-ℕ x (mul-ℕ y z))
@@ -1263,12 +1268,11 @@ left-distributive-mul-dist-ℕ (succ-ℕ m) (succ-ℕ n) (succ-ℕ k) =
 
 scalar-invariant-cong-ℕ :
   (k x y z : ℕ) → cong-ℕ k x y →  cong-ℕ k (mul-ℕ z x) (mul-ℕ z y)
-scalar-invariant-cong-ℕ k x y z (pair d p) =
-  pair
-    ( mul-ℕ z d)
-    ( ( associative-mul-ℕ z d k) ∙
-      ( ( ap (mul-ℕ z) p) ∙
-        ( left-distributive-mul-dist-ℕ x y z)))
+pr1 (scalar-invariant-cong-ℕ k x y z (pair d p)) = mul-ℕ z d
+pr2 (scalar-invariant-cong-ℕ k x y z (pair d p)) =
+  ( associative-mul-ℕ z d k) ∙
+    ( ( ap (mul-ℕ z) p) ∙
+      ( left-distributive-mul-dist-ℕ x y z))
 
 concatenate-eq-cong-eq-ℕ :
   (k : ℕ) {x1 x2 x3 x4 : ℕ} →
@@ -1329,8 +1333,9 @@ associative-mul-Fin {succ-ℕ k} x y z =
 
 trans-div-Fin :
   {k : ℕ} (x y z : Fin k) → div-Fin x y → div-Fin y z → div-Fin x z
-trans-div-Fin x y z (pair u p) (pair v q) =
-  pair (mul-Fin v u) (associative-mul-Fin v u x ∙ (ap (mul-Fin v) p ∙ q))
+pr1 (trans-div-Fin x y z (pair u p) (pair v q)) = mul-Fin v u
+pr2 (trans-div-Fin x y z (pair u p) (pair v q)) =
+  associative-mul-Fin v u x ∙ (ap (mul-Fin v) p ∙ q)
 
 left-zero-law-mul-Fin :
   {k : ℕ} (x : Fin (succ-ℕ k)) → Id (mul-Fin zero-Fin x) zero-Fin
@@ -1346,10 +1351,12 @@ left-zero-law-mul-Fin {k} x =
   ( issec-nat-Fin (zero-Fin {k}))
 
 div-zero-Fin : {k : ℕ} (x : Fin (succ-ℕ k)) → div-Fin x zero-Fin
-div-zero-Fin x = pair zero-Fin (left-zero-law-mul-Fin x)
+pr1 (div-zero-Fin x) = zero-Fin
+pr2 (div-zero-Fin x) = left-zero-law-mul-Fin x
 
 div-one-Fin : {k : ℕ} (x : Fin (succ-ℕ k)) → div-Fin one-Fin x
-div-one-Fin x = pair x (right-unit-law-mul-Fin x)
+pr1 (div-one-Fin x) = x
+pr2 (div-one-Fin x) = right-unit-law-mul-Fin x
 
 right-zero-law-mul-Fin :
   {k : ℕ} (x : Fin (succ-ℕ k)) → Id (mul-Fin x zero-Fin) zero-Fin
@@ -1371,7 +1378,8 @@ is-unit-one-Fin : {k : ℕ} → is-unit-Fin (one-Fin {k})
 is-unit-one-Fin {k} = refl-div-Fin one-Fin
 
 one-unit-Fin : {k : ℕ} → unit-Fin (succ-ℕ k)
-one-unit-Fin {k} = pair one-Fin is-unit-one-Fin
+pr1 (one-unit-Fin {k}) = one-Fin
+pr2 (one-unit-Fin {k}) = is-unit-one-Fin
 
 square-ℕ : ℕ → ℕ
 square-ℕ x = mul-ℕ x x
@@ -1385,23 +1393,23 @@ square-succ-ℕ k =
 
 is-unit-neg-one-Fin : {k : ℕ} → is-unit-Fin (neg-one-Fin {k})
 is-unit-neg-one-Fin {zero-ℕ} = refl-div-Fin neg-one-Fin
-is-unit-neg-one-Fin {succ-ℕ k} =
-  pair
-    ( neg-one-Fin)
-    ( eq-mod-succ-cong-ℕ
-      ( succ-ℕ k)
-      ( mul-ℕ (succ-ℕ k) (succ-ℕ k))
-      ( one-ℕ)
-      ( concatenate-eq-cong-ℕ
-        ( succ-ℕ (succ-ℕ k))
-        { x3 = one-ℕ}
-        ( square-succ-ℕ k)
-        ( pair k
-          ( ( commutative-mul-ℕ k (succ-ℕ (succ-ℕ k))) ∙
-            ( inv (right-unit-law-dist-ℕ (mul-ℕ (succ-ℕ (succ-ℕ k)) k)))))))
+pr1 (is-unit-neg-one-Fin {succ-ℕ k}) = neg-one-Fin
+pr2 (is-unit-neg-one-Fin {succ-ℕ k}) =
+  eq-mod-succ-cong-ℕ
+    ( succ-ℕ k)
+    ( mul-ℕ (succ-ℕ k) (succ-ℕ k))
+    ( one-ℕ)
+    ( concatenate-eq-cong-ℕ
+      ( succ-ℕ (succ-ℕ k))
+      { x3 = one-ℕ}
+      ( square-succ-ℕ k)
+      ( pair k
+        ( ( commutative-mul-ℕ k (succ-ℕ (succ-ℕ k))) ∙
+          ( inv (right-unit-law-dist-ℕ (mul-ℕ (succ-ℕ (succ-ℕ k)) k))))))
 
 neg-one-unit-Fin : {k : ℕ} → unit-Fin (succ-ℕ k)
-neg-one-unit-Fin = pair neg-one-Fin is-unit-neg-one-Fin
+pr1 neg-one-unit-Fin = neg-one-Fin
+pr2 neg-one-unit-Fin = is-unit-neg-one-Fin
 
 mul-Fin' :
   {k : ℕ} → Fin k → Fin k → Fin k
@@ -1410,23 +1418,24 @@ mul-Fin' {k} x y = mul-Fin y x
 is-unit-mul-Fin :
   {k : ℕ} {x y : Fin k} →
   is-unit-Fin x → is-unit-Fin y → is-unit-Fin (mul-Fin x y)
-is-unit-mul-Fin {succ-ℕ k} {x} {y} (pair d p) (pair e q) =
-  pair
-    ( mul-Fin e d)
-    ( ( associative-mul-Fin e d (mul-Fin x y)) ∙
-      ( ( ap
-          ( mul-Fin e)
-          ( ( inv (associative-mul-Fin d x y)) ∙
-            ( ap (mul-Fin' y) p ∙ left-unit-law-mul-Fin y))) ∙
-        ( q)))
+pr1 (is-unit-mul-Fin {succ-ℕ k} {x} {y} (pair d p) (pair e q)) = mul-Fin e d
+pr2 (is-unit-mul-Fin {succ-ℕ k} {x} {y} (pair d p) (pair e q)) =
+  ( associative-mul-Fin e d (mul-Fin x y)) ∙
+    ( ( ap
+        ( mul-Fin e)
+        ( ( inv (associative-mul-Fin d x y)) ∙
+          ( ap (mul-Fin' y) p ∙ left-unit-law-mul-Fin y))) ∙
+      ( q))
 
 mul-unit-Fin : {k : ℕ} → unit-Fin k → unit-Fin k → unit-Fin k
-mul-unit-Fin u v =
-  pair (mul-Fin (pr1 u) (pr1 v)) (is-unit-mul-Fin (pr2 u) (pr2 v))
+pr1 (mul-unit-Fin u v) = mul-Fin (pr1 u) (pr1 v)
+pr2 (mul-unit-Fin u v) = is-unit-mul-Fin (pr2 u) (pr2 v)
 
 inv-unit-Fin : {k : ℕ} → unit-Fin k → unit-Fin k
-inv-unit-Fin {succ-ℕ k} (pair u (pair v p)) =
-  pair v (pair u (commutative-mul-Fin u v ∙ p))
+pr1 (inv-unit-Fin {succ-ℕ k} (pair u (pair v p))) = v
+pr1 (pr2 (inv-unit-Fin {succ-ℕ k} (pair u (pair v p)))) = u
+pr2 (pr2 (inv-unit-Fin {succ-ℕ k} (pair u (pair v p)))) =
+  commutative-mul-Fin u v ∙ p
 
 sim-unit-Fin :
   {k : ℕ} → Fin k → Fin k → UU lzero
@@ -1434,25 +1443,26 @@ sim-unit-Fin {k} x y = Σ (unit-Fin k) (λ u → Id (mul-Fin (pr1 u) x) y)
 
 refl-sim-unit-Fin :
   {k : ℕ} (x : Fin k) → sim-unit-Fin x x
-refl-sim-unit-Fin {succ-ℕ k} x = pair one-unit-Fin (left-unit-law-mul-Fin x)
+pr1 (refl-sim-unit-Fin {succ-ℕ k} x) = one-unit-Fin
+pr2 (refl-sim-unit-Fin {succ-ℕ k} x) = left-unit-law-mul-Fin x
 
 symm-sim-unit-Fin :
   {k : ℕ} (x y : Fin k) → sim-unit-Fin x y → sim-unit-Fin y x
-symm-sim-unit-Fin {succ-ℕ k} x y (pair (pair u (pair v q)) p) =
-  pair
-    ( inv-unit-Fin (pair u (pair v q)))
-    ( ( ( ( ap (mul-Fin v) (inv p)) ∙
-          ( inv (associative-mul-Fin v u x))) ∙
-        ( ap (mul-Fin' x) q)) ∙
-      ( left-unit-law-mul-Fin x))
+pr1 (symm-sim-unit-Fin {succ-ℕ k} x y (pair (pair u (pair v q)) p)) =
+  inv-unit-Fin (pair u (pair v q))
+pr2 (symm-sim-unit-Fin {succ-ℕ k} x y (pair (pair u (pair v q)) p)) =
+  ( ( ( ap (mul-Fin v) (inv p)) ∙
+        ( inv (associative-mul-Fin v u x))) ∙
+      ( ap (mul-Fin' x) q)) ∙
+    ( left-unit-law-mul-Fin x)
 
 trans-sim-unit-Fin :
   {k : ℕ} (x y z : Fin k) → sim-unit-Fin x y → sim-unit-Fin y z →
   sim-unit-Fin x z
-trans-sim-unit-Fin {succ-ℕ k} x y z (pair u p) (pair v q) =
-  pair
-    ( mul-unit-Fin v u)
-    ( associative-mul-Fin (pr1 v) (pr1 u) x ∙ (ap (mul-Fin (pr1 v)) p ∙ q))
+pr1 (trans-sim-unit-Fin {succ-ℕ k} x y z (pair u p) (pair v q)) =
+   mul-unit-Fin v u
+pr2 (trans-sim-unit-Fin {succ-ℕ k} x y z (pair u p) (pair v q)) =
+   associative-mul-Fin (pr1 v) (pr1 u) x ∙ (ap (mul-Fin (pr1 v)) p ∙ q)
 
 is-mod-unit-ℕ : (k x : ℕ) → UU lzero
 is-mod-unit-ℕ k x = Σ ℕ (λ l → cong-ℕ k (mul-ℕ l x) one-ℕ)
@@ -1468,26 +1478,26 @@ cong-eq-mod-succ-ℕ k x y p =
 
 is-mod-unit-sim-unit-mod-succ-ℕ :
   (k x : ℕ) → sim-unit-Fin (mod-succ-ℕ k x) one-Fin → is-mod-unit-ℕ (succ-ℕ k) x
-is-mod-unit-sim-unit-mod-succ-ℕ k x (pair u p) =
-  pair
-    ( nat-Fin (pr1 u))
-    ( cong-eq-mod-succ-ℕ k
-      ( mul-ℕ (nat-Fin (pr1 u)) x)
-      ( one-ℕ)
-      ( ( eq-mod-succ-cong-ℕ k
-          ( mul-ℕ (nat-Fin (pr1 u)) x)
-          ( mul-ℕ (nat-Fin (pr1 u)) (nat-Fin (mod-succ-ℕ k x)))
-          ( scalar-invariant-cong-ℕ
+pr1 (is-mod-unit-sim-unit-mod-succ-ℕ k x (pair u p)) =
+   nat-Fin (pr1 u)
+pr2 (is-mod-unit-sim-unit-mod-succ-ℕ k x (pair u p)) =
+  cong-eq-mod-succ-ℕ k
+    ( mul-ℕ (nat-Fin (pr1 u)) x)
+    ( one-ℕ)
+    ( ( eq-mod-succ-cong-ℕ k
+        ( mul-ℕ (nat-Fin (pr1 u)) x)
+        ( mul-ℕ (nat-Fin (pr1 u)) (nat-Fin (mod-succ-ℕ k x)))
+        ( scalar-invariant-cong-ℕ
+          ( succ-ℕ k)
+          ( x)
+          ( nat-Fin (mod-succ-ℕ k x))
+          ( nat-Fin (pr1 u))
+          ( symm-cong-ℕ
             ( succ-ℕ k)
-            ( x)
             ( nat-Fin (mod-succ-ℕ k x))
-            ( nat-Fin (pr1 u))
-            ( symm-cong-ℕ
-              ( succ-ℕ k)
-              ( nat-Fin (mod-succ-ℕ k x))
-              ( x)
-              ( cong-nat-mod-succ-ℕ k x)))) ∙
-        ( p)))
+            ( x)
+            ( cong-nat-mod-succ-ℕ k x)))) ∙
+      ( p))
 
 is-decidable-Σ-Fin :
   {l : Level} {k : ℕ} {P : Fin k → UU l} →
@@ -1502,5 +1512,6 @@ is-decidable-Σ-Fin {l} {succ-ℕ k} {P} d with d (inr star)
     ( is-decidable-Σ-Fin {l} {k} {P ∘ inl} (λ x → d (inl x)))
   where
   g : Σ (Fin (succ-ℕ k)) P → Σ (Fin k) (P ∘ inl)
-  g (pair (inl x) p) = pair x p
+  pr1 (g (pair (inl x) p)) = x
+  pr2 (g (pair (inl x) p)) = p
   g (pair (inr star) p) = ex-falso (f p)
