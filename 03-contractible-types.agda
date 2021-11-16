@@ -792,11 +792,11 @@ pr2 (pr1 (is-contr-prod {A = A} {B = B} (pair a C) (pair b D))) = b
 pr2 (is-contr-prod {A = A} {B = B} (pair a C) (pair b D)) (pair x y) =
   eq-pair (C x) (D y)
 
--- !! I stopped here.
 map-inv-left-unit-law-Σ-is-contr :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} → is-contr A → (a : A) →
   B a → Σ A B
-map-inv-left-unit-law-Σ-is-contr C a = pair a
+pr1 (map-inv-left-unit-law-Σ-is-contr C a b) = a
+pr2 (map-inv-left-unit-law-Σ-is-contr C a b) = b
 
 map-left-unit-law-Σ-is-contr :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} → is-contr A → (a : A) →
@@ -844,10 +844,8 @@ is-equiv-map-left-unit-law-Σ-is-contr C a =
 left-unit-law-Σ-is-contr :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} (C : is-contr A) (a : A) →
   Σ A B ≃ B a
-left-unit-law-Σ-is-contr C a =
-  pair
-    ( map-left-unit-law-Σ-is-contr C a)
-    ( is-equiv-map-left-unit-law-Σ-is-contr C a)
+pr1 (left-unit-law-Σ-is-contr C a) = map-left-unit-law-Σ-is-contr C a
+pr2 (left-unit-law-Σ-is-contr C a) = is-equiv-map-left-unit-law-Σ-is-contr C a
 
 left-unit-law-prod-is-contr :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} (C : is-contr A) → (A × B) ≃ B
@@ -866,10 +864,9 @@ is-equiv-map-inv-left-unit-law-Σ-is-contr C a =
 inv-left-unit-law-Σ-is-contr :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} (C : is-contr A) (a : A) →
   B a ≃ Σ A B
-inv-left-unit-law-Σ-is-contr C a =
-  pair
-    ( map-inv-left-unit-law-Σ-is-contr C a)
-    ( is-equiv-map-inv-left-unit-law-Σ-is-contr C a)
+pr1 (inv-left-unit-law-Σ-is-contr C a) = map-inv-left-unit-law-Σ-is-contr C a
+pr2 (inv-left-unit-law-Σ-is-contr C a) =
+  is-equiv-map-inv-left-unit-law-Σ-is-contr C a
 
 is-path-split :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} → (A → B) → UU (l1 ⊔ l2)
@@ -879,25 +876,30 @@ is-path-split {A = A} {B = B} f =
 is-path-split-is-equiv :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} (f : A → B) →
   is-equiv f → is-path-split f
-is-path-split-is-equiv f is-equiv-f =
-  pair (pr1 is-equiv-f) (λ x y → pr1 (is-emb-is-equiv is-equiv-f x y))
+pr1 (is-path-split-is-equiv f is-equiv-f) = pr1 is-equiv-f
+pr2 (is-path-split-is-equiv f is-equiv-f) x y =
+  pr1 (is-emb-is-equiv is-equiv-f x y)
 
 is-coherently-invertible-is-path-split :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} (f : A → B) →
   is-path-split f → is-coherently-invertible f
-is-coherently-invertible-is-path-split {A = A} {B = B} f
-  ( pair (pair g issec-g) sec-ap-f) =
-  let φ : ((x : A) → fib (ap f) (issec-g (f x))) →
-              Σ ((g ∘ f) ~ id)
-              ( λ H → (htpy-right-whisk issec-g f) ~ (htpy-left-whisk f H))
-      φ =  ( tot (λ H' → inv-htpy)) ∘
-             ( λ s → pair (λ x → pr1 (s x)) (λ x → pr2 (s x)))
-  in
-  pair g
-    ( pair issec-g
-      ( φ (λ x → pair
-        ( pr1 (sec-ap-f (g (f x)) x) (issec-g (f x)))
-        ( pr2 (sec-ap-f (g (f x)) x) (issec-g (f x))))))
+pr1 ( is-coherently-invertible-is-path-split {A = A} {B = B} f
+      ( pair (pair g issec-g) sec-ap-f)) = g
+pr1 ( pr2
+      ( is-coherently-invertible-is-path-split {A = A} {B = B} f
+        ( pair (pair g issec-g) sec-ap-f))) = issec-g
+pr2 ( pr2
+      ( is-coherently-invertible-is-path-split {A = A} {B = B} f
+        ( pair (pair g issec-g) sec-ap-f))) =
+  φ ( λ x → pair
+      ( pr1 (sec-ap-f (g (f x)) x) (issec-g (f x)))
+      ( pr2 (sec-ap-f (g (f x)) x) (issec-g (f x))))
+  where
+  φ : ((x : A) → fib (ap f) (issec-g (f x))) →
+      Σ ( (g ∘ f) ~ id)
+        ( λ H → (htpy-right-whisk issec-g f) ~ (htpy-left-whisk f H))
+  φ = ( tot (λ H' → inv-htpy)) ∘
+      ( λ s → pair (λ x → pr1 (s x)) (λ x → pr2 (s x)))
 
 is-equiv-is-coherently-invertible :
   { l1 l2 : Level} {A : UU l1} {B : UU l2}
@@ -923,8 +925,10 @@ swap-total-Eq-structure :
   (D : (x : A) → B x → C x → UU l4) →
   Σ (Σ A B) (λ t → Σ (C (pr1 t)) (D (pr1 t) (pr2 t))) →
   Σ (Σ A C) (λ t → Σ (B (pr1 t)) (λ y → D (pr1 t) y (pr2 t)))
-swap-total-Eq-structure B C D (pair (pair a b) (pair c d)) =
-  pair (pair a c) (pair b d)
+pr1 (pr1 (swap-total-Eq-structure B C D (pair (pair a b) (pair c d)))) = a
+pr2 (pr1 (swap-total-Eq-structure B C D (pair (pair a b) (pair c d)))) = c
+pr1 (pr2 (swap-total-Eq-structure B C D (pair (pair a b) (pair c d)))) = b
+pr2 (pr2 (swap-total-Eq-structure B C D (pair (pair a b) (pair c d)))) = d
 
 htpy-swap-total-Eq-structure :
   {l1 l2 l3 l4 : Level} {A : UU l1} (B : A → UU l2) (C : A → UU l3)
@@ -1012,10 +1016,10 @@ Ind-identity-system :
   {i j : Level} (k : Level) {A : UU i} {B : A → UU j} (a : A) (b : B a) →
   (is-contr-AB : is-contr (Σ A B)) →
   IND-identity-system k B a b
-Ind-identity-system k a b is-contr-AB P =
-  pair
-    ( ind-identity-system a b is-contr-AB P)
-    ( comp-identity-system a b is-contr-AB P)
+pr1 (Ind-identity-system k a b is-contr-AB P) =
+  ind-identity-system a b is-contr-AB P
+pr2 (Ind-identity-system k a b is-contr-AB P) =
+  comp-identity-system a b is-contr-AB P
 
 is-contr-total-Eq-coprod-inl :
   {l1 l2 : Level} (A : UU l1) (B : UU l2) (x : A) →
@@ -1092,8 +1096,8 @@ is-equiv-Eq-eq-coprod A B (inr x) = is-equiv-Eq-eq-coprod-inr A B x
 equiv-Eq-eq-coprod :
   {l1 l2 : Level} (A : UU l1) (B : UU l2) (x y : coprod A B) →
   Id x y ≃ Eq-coprod A B x y
-equiv-Eq-eq-coprod A B x y =
-  pair (Eq-eq-coprod A B x y) (is-equiv-Eq-eq-coprod A B x y)
+pr1 (equiv-Eq-eq-coprod A B x y) = Eq-eq-coprod A B x y
+pr2 (equiv-Eq-eq-coprod A B x y) = is-equiv-Eq-eq-coprod A B x y
 
 map-compute-eq-coprod-inl-inl :
   {l1 l2 : Level} {A : UU l1} {B : UU l2}
@@ -1117,10 +1121,9 @@ is-equiv-map-compute-eq-coprod-inl-inl x x' =
 compute-eq-coprod-inl-inl :
   {l1 l2 : Level} {A : UU l1} {B : UU l2}
   (x x' : A) → (Id (inl {B = B} x) (inl x')) ≃ (Id x x')
-compute-eq-coprod-inl-inl x x' =
-  pair
-    ( map-compute-eq-coprod-inl-inl x x')
-    ( is-equiv-map-compute-eq-coprod-inl-inl x x')
+pr1 (compute-eq-coprod-inl-inl x x') = map-compute-eq-coprod-inl-inl x x'
+pr2 (compute-eq-coprod-inl-inl x x') =
+  is-equiv-map-compute-eq-coprod-inl-inl x x'
 
 map-compute-eq-coprod-inl-inr :
   {l1 l2 : Level} {A : UU l1} {B : UU l2}
@@ -1144,10 +1147,9 @@ is-equiv-map-compute-eq-coprod-inl-inr x y' =
 compute-eq-coprod-inl-inr :
   {l1 l2 : Level} {A : UU l1} {B : UU l2}
   (x : A) (y' : B) → (Id (inl x) (inr y')) ≃ empty
-compute-eq-coprod-inl-inr x y' =
-  pair
-    ( map-compute-eq-coprod-inl-inr x y')
-    ( is-equiv-map-compute-eq-coprod-inl-inr x y')
+pr1 (compute-eq-coprod-inl-inr x y') = map-compute-eq-coprod-inl-inr x y'
+pr2 (compute-eq-coprod-inl-inr x y') =
+  is-equiv-map-compute-eq-coprod-inl-inr x y'
 
 map-compute-eq-coprod-inr-inl :
   {l1 l2 : Level} {A : UU l1} {B : UU l2}
@@ -1171,10 +1173,9 @@ is-equiv-map-compute-eq-coprod-inr-inl y x' =
 compute-eq-coprod-inr-inl :
   {l1 l2 : Level} {A : UU l1} {B : UU l2}
   (y : B) (x' : A) → (Id (inr y) (inl x')) ≃ empty
-compute-eq-coprod-inr-inl y x' =
-  pair
-    ( map-compute-eq-coprod-inr-inl y x')
-    ( is-equiv-map-compute-eq-coprod-inr-inl y x')
+pr1 (compute-eq-coprod-inr-inl y x') = map-compute-eq-coprod-inr-inl y x'
+pr2 (compute-eq-coprod-inr-inl y x') =
+  is-equiv-map-compute-eq-coprod-inr-inl y x'
 
 map-compute-eq-coprod-inr-inr :
   {l1 l2 : Level} {A : UU l1} {B : UU l2}
@@ -1198,27 +1199,30 @@ is-equiv-map-compute-eq-coprod-inr-inr y y' =
 compute-eq-coprod-inr-inr :
   {l1 l2 : Level} {A : UU l1} {B : UU l2}
   (y y' : B) → (Id (inr {A = A} y) (inr y')) ≃ (Id y y')
-compute-eq-coprod-inr-inr y y' =
-  pair
-    ( map-compute-eq-coprod-inr-inr y y')
-    ( is-equiv-map-compute-eq-coprod-inr-inr y y')
+pr1 (compute-eq-coprod-inr-inr y y') = map-compute-eq-coprod-inr-inr y y'
+pr2 (compute-eq-coprod-inr-inr y y') =
+  is-equiv-map-compute-eq-coprod-inr-inr y y'
 
 map-Σ-map-base :
   { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f : A → B) (C : B → UU l3) →
   Σ A (λ x → C (f x)) → Σ B C
-map-Σ-map-base f C s = pair (f (pr1 s)) (pr2 s)
+pr1 (map-Σ-map-base f C s) = f (pr1 s)
+pr2 (map-Σ-map-base f C s) = pr2 s
 
 fib-map-Σ-map-base-fib :
   { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f : A → B) (C : B → UU l3) →
   ( t : Σ B C) → fib f (pr1 t) → fib (map-Σ-map-base f C) t
-fib-map-Σ-map-base-fib f C (pair .(f x) z) (pair x refl) =
-  pair (pair x z) refl
+pr1 (pr1 (fib-map-Σ-map-base-fib f C (pair .(f x) z) (pair x refl))) = x
+pr2 (pr1 (fib-map-Σ-map-base-fib f C (pair .(f x) z) (pair x refl))) = z
+pr2 (fib-map-Σ-map-base-fib f C (pair .(f x) z) (pair x refl)) = refl
 
 fib-fib-map-Σ-map-base :
   { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f : A → B) (C : B → UU l3) →
   ( t : Σ B C) → fib (map-Σ-map-base f C) t → fib f (pr1 t)
-fib-fib-map-Σ-map-base f C .(pair (f x) z) (pair (pair x z) refl) =
-  pair x refl
+pr1 ( fib-fib-map-Σ-map-base f C .(map-Σ-map-base f C (pair x z))
+      ( pair (pair x z) refl)) = x
+pr2 ( fib-fib-map-Σ-map-base f C .(map-Σ-map-base f C (pair x z))
+      ( pair (pair x z) refl)) = refl
 
 issec-fib-fib-map-Σ-map-base :
   { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f : A → B) (C : B → UU l3) →
@@ -1245,9 +1249,8 @@ is-equiv-fib-map-Σ-map-base-fib f C t =
 equiv-fib-map-Σ-map-base-fib :
   { l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (f : A → B) (C : B → UU l3) →
   ( t : Σ B C) → (fib f (pr1 t)) ≃ (fib (map-Σ-map-base f C) t)
-equiv-fib-map-Σ-map-base-fib f C t =
-  pair ( fib-map-Σ-map-base-fib f C t)
-       ( is-equiv-fib-map-Σ-map-base-fib f C t)
+pr1 (equiv-fib-map-Σ-map-base-fib f C t) = fib-map-Σ-map-base-fib f C t
+pr2 (equiv-fib-map-Σ-map-base-fib f C t) = is-equiv-fib-map-Σ-map-base-fib f C t
 
 is-contr-map-map-Σ-map-base :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (C : B → UU l3) (f : A → B) →
@@ -1269,8 +1272,9 @@ is-equiv-map-Σ-map-base C f is-equiv-f =
 equiv-Σ-equiv-base :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2} (C : B → UU l3) (e : A ≃ B) →
   Σ A (C ∘ (map-equiv e)) ≃ Σ B C
-equiv-Σ-equiv-base C (pair f is-equiv-f) =
-  pair (map-Σ-map-base f C) (is-equiv-map-Σ-map-base C f is-equiv-f)
+pr1 (equiv-Σ-equiv-base C (pair f is-equiv-f)) = map-Σ-map-base f C
+pr2 (equiv-Σ-equiv-base C (pair f is-equiv-f)) =
+  is-equiv-map-Σ-map-base C f is-equiv-f
 
 map-equiv-Fin-one-ℕ : Fin one-ℕ → unit
 map-equiv-Fin-one-ℕ (inr star) = star
@@ -1294,7 +1298,8 @@ is-equiv-map-equiv-Fin-one-ℕ =
     isretr-inv-map-equiv-Fin-one-ℕ
 
 equiv-Fin-one-ℕ : Fin one-ℕ ≃ unit
-equiv-Fin-one-ℕ = pair map-equiv-Fin-one-ℕ is-equiv-map-equiv-Fin-one-ℕ
+pr1 equiv-Fin-one-ℕ = map-equiv-Fin-one-ℕ
+pr2 equiv-Fin-one-ℕ = is-equiv-map-equiv-Fin-one-ℕ
 
 is-contr-Fin-one-ℕ : is-contr (Fin one-ℕ)
 is-contr-Fin-one-ℕ = is-contr-equiv unit equiv-Fin-one-ℕ is-contr-unit
@@ -1359,7 +1364,8 @@ map-Σ :
   {l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} {C : A → UU l3}
   (D : B → UU l4) (f : A → B) (g : (x : A) → C x → D (f x)) →
   Σ A C → Σ B D
-map-Σ D f g t = pair (f (pr1 t)) (g (pr1 t) (pr2 t))
+pr1 (map-Σ D f g t) = f (pr1 t)
+pr2 (map-Σ D f g t) = g (pr1 t) (pr2 t)
 
 triangle-map-Σ :
   {l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} {C : A → UU l3}
@@ -1401,14 +1407,13 @@ equiv-Σ :
   {l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} {C : A → UU l3}
   (D : B → UU l4) (e : A ≃ B) (g : (x : A) → C x ≃ D (map-equiv e x)) →
   Σ A C ≃ Σ B D
-equiv-Σ D e g =
-  pair
-    ( map-Σ D (map-equiv e) (λ x → map-equiv (g x)))
-    ( is-equiv-map-Σ D
-      ( map-equiv e)
-      ( λ x → map-equiv (g x))
-      ( is-equiv-map-equiv e)
-      ( λ x → is-equiv-map-equiv (g x)))
+pr1 (equiv-Σ D e g) = map-Σ D (map-equiv e) (λ x → map-equiv (g x))
+pr2 (equiv-Σ D e g) =
+  is-equiv-map-Σ D
+    ( map-equiv e)
+    ( λ x → map-equiv (g x))
+    ( is-equiv-map-equiv e)
+    ( λ x → is-equiv-map-equiv (g x))
 
 is-equiv-top-is-equiv-left-square :
   {l1 l2 l3 l4 : Level} {A : UU l1} {B : UU l2} {C : UU l3} {D : UU l4}
@@ -1456,7 +1461,8 @@ is-emb-comp' g h = is-emb-comp (g ∘ h) g h refl-htpy
 comp-emb :
   {i j k : Level} {A : UU i} {B : UU j} {C : UU k} →
   (B ↪ C) → (A ↪ B) → (A ↪ C)
-comp-emb (pair g H) (pair f K) = pair (g ∘ f) (is-emb-comp' g f H K)
+pr1 (comp-emb (pair g H) (pair f K)) = g ∘ f
+pr2 (comp-emb (pair g H) (pair f K)) = is-emb-comp' g f H K
 
 is-emb-inl :
   {i j : Level} (A : UU i) (B : UU j) → is-emb (inl {A = A} {B = B})
@@ -1475,7 +1481,8 @@ is-emb-inl A B x =
 
 emb-inl :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} → A ↪ coprod A B
-emb-inl {l1} {l2} {A} {B} = pair inl (is-emb-inl A B)
+pr1 (emb-inl {l1} {l2} {A} {B}) = inl
+pr2 (emb-inl {l1} {l2} {A} {B}) = is-emb-inl A B
 
 is-emb-inr :
   {i j : Level} (A : UU i) (B : UU j) → is-emb (inr {A = A} {B = B})
@@ -1494,7 +1501,8 @@ is-emb-inr A B x =
 
 emb-inr :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} → B ↪ coprod A B
-emb-inr {l1} {l2} {A} {B} = pair inr (is-emb-inr A B)
+pr1 (emb-inr {l1} {l2} {A} {B}) = inr
+pr2 (emb-inr {l1} {l2} {A} {B}) = is-emb-inr A B
 
 is-emb-coprod :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2} {C : UU l3}
