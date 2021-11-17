@@ -48,18 +48,20 @@ is-zero-number-of-elements-count-is-empty (pair (succ-ℕ k) e) H =
 
 count-is-empty :
   {l : Level} {X : UU l} → is-empty X → count X
-count-is-empty H =
-  pair zero-ℕ (inv-equiv (pair H (is-equiv-is-empty' H)))
+pr1 (count-is-empty H) = zero-ℕ
+pr2 (count-is-empty H) = inv-equiv (pair H (is-equiv-is-empty' H))
 
 count-Fin : (k : ℕ) → count (Fin k)
-count-Fin k = pair k equiv-id
+pr1 (count-Fin k) = k
+pr2 (count-Fin k) = equiv-id
 
 count-empty : count empty
 count-empty = count-Fin zero-ℕ
 
 count-is-contr :
   {l : Level} {X : UU l} → is-contr X → count X
-count-is-contr H = pair one-ℕ (equiv-is-contr is-contr-Fin-one-ℕ H)
+pr1 (count-is-contr H) = one-ℕ
+pr2 (count-is-contr H) = equiv-is-contr is-contr-Fin-one-ℕ H
 
 is-contr-is-one-number-of-elements-count :
   {l : Level} {X : UU l} (e : count X) →
@@ -90,8 +92,8 @@ equiv-count-equiv e f = e ∘e (equiv-count f)
 
 count-equiv :
   {l1 l2 : Level} {X : UU l1} {Y : UU l2} (e : X ≃ Y) → count X → count Y
-count-equiv e f =
-  pair (number-of-elements-count f) (equiv-count-equiv e f)
+pr1 (count-equiv e f) = number-of-elements-count f
+pr2 (count-equiv e f) = equiv-count-equiv e f
 
 count-equiv' :
   {l1 l2 : Level} {X : UU l1} {Y : UU l2} (e : X ≃ Y) → count Y → count X
@@ -128,11 +130,9 @@ count-eq d x y = cases-count-eq d (d x y)
 count-coprod :
   {l1 l2 : Level} {X : UU l1} {Y : UU l2} →
   count X → count Y → count (coprod X Y)
-count-coprod (pair k e) (pair l f) =
-  pair
-    ( add-ℕ k l)
-    ( ( equiv-coprod e f) ∘e
-      ( inv-equiv (coprod-Fin k l)))
+pr1 (count-coprod (pair k e) (pair l f)) = add-ℕ k l
+pr2 (count-coprod (pair k e) (pair l f)) =
+  ( equiv-coprod e f) ∘e (inv-equiv (coprod-Fin k l))
 
 number-of-elements-count-coprod :
   {l1 l2 : Level} {X : UU l1} {Y : UU l2} (e : count X) (f : count Y) →
@@ -169,8 +169,8 @@ equiv-count-Σ' k e f = pr2 (count-Σ' k e f)
 count-Σ :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} →
   count A → ((x : A) → count (B x)) → count (Σ A B)
-count-Σ (pair k e) f =
-  pair (number-of-elements-count (count-Σ' k e f)) (equiv-count-Σ' k e f)
+pr1 (count-Σ (pair k e) f) = number-of-elements-count (count-Σ' k e f)
+pr2 (count-Σ (pair k e) f) = equiv-count-Σ' k e f
 
 is-finite-Prop :
   {l : Level} → UU l → UU-Prop l
@@ -274,11 +274,9 @@ is-finite-Σ {X = X} {Y} is-finite-X is-finite-Y =
 
 count-prod :
   {l1 l2 : Level} {X : UU l1} {Y : UU l2} → count X → count Y → count (X × Y)
-count-prod (pair k e) (pair l f) =
-  pair
-    ( mul-ℕ k l)
-    ( ( equiv-prod e f) ∘e
-      ( inv-equiv (prod-Fin k l)))
+pr1 (count-prod (pair k e) (pair l f)) = mul-ℕ k l
+pr2 (count-prod (pair k e) (pair l f)) =
+  ( equiv-prod e f) ∘e (inv-equiv (prod-Fin k l))
 
 number-of-elements-count-prod :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} (count-A : count A)
@@ -398,8 +396,8 @@ is-prop-has-decidable-equality {l1} {X} =
 
 has-decidable-equality-Prop :
   {l1 : Level} (X : UU l1) → UU-Prop l1
-has-decidable-equality-Prop X =
-  pair (has-decidable-equality X) is-prop-has-decidable-equality
+pr1 (has-decidable-equality-Prop X) = has-decidable-equality X
+pr2 (has-decidable-equality-Prop X) = is-prop-has-decidable-equality
 
 has-decidable-equality-is-finite :
   {l1 : Level} {X : UU l1} → is-finite X → has-decidable-equality X
@@ -423,9 +421,9 @@ is-finite-eq :
 is-finite-eq d {x} {y} = is-finite-count (count-eq d x y)
 
 Id-𝔽 : (X : 𝔽) (x y : type-𝔽 X) → 𝔽
-Id-𝔽 X x y =
-  pair ( Id x y)
-       ( is-finite-eq (has-decidable-equality-is-finite (is-finite-type-𝔽 X)))
+pr1 (Id-𝔽 X x y) = Id x y
+pr2 (Id-𝔽 X x y) =
+  is-finite-eq (has-decidable-equality-is-finite (is-finite-type-𝔽 X))
 
 is-finite-prod :
   {l1 l2 : Level} {X : UU l1} {Y : UU l2} →
@@ -439,9 +437,8 @@ is-finite-prod {X = X} {Y} is-finite-X is-finite-Y =
         ( is-finite-count ∘ (count-prod e)))
 
 prod-𝔽 : 𝔽 → 𝔽 → 𝔽
-prod-𝔽 X Y =
-  pair ( prod (type-𝔽 X) (type-𝔽 Y))
-       ( is-finite-prod (is-finite-type-𝔽 X) (is-finite-type-𝔽 Y))
+pr1 (prod-𝔽 X Y) = prod (type-𝔽 X) (type-𝔽 Y)
+pr2 (prod-𝔽 X Y) = is-finite-prod (is-finite-type-𝔽 X) (is-finite-type-𝔽 Y)
 
 is-finite-left-factor :
   {l1 l2 : Level} {X : UU l1} {Y : UU l2} →
@@ -456,9 +453,8 @@ is-finite-right-factor f x =
   functor-trunc-Prop (λ e → count-right-factor e x) f
 
 Π-𝔽 : (A : 𝔽) (B : type-𝔽 A → 𝔽) → 𝔽
-Π-𝔽 A B =
-  pair ( (x : type-𝔽 A) → type-𝔽 (B x))
-       ( is-finite-Π (is-finite-type-𝔽 A) (λ x → is-finite-type-𝔽 (B x)))
+pr1 (Π-𝔽 A B) = (x : type-𝔽 A) → type-𝔽 (B x)
+pr2 (Π-𝔽 A B) = is-finite-Π (is-finite-type-𝔽 A) (λ x → is-finite-type-𝔽 (B x))
 
 is-finite-function-type :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} →
@@ -466,9 +462,9 @@ is-finite-function-type :
 is-finite-function-type f g = is-finite-Π f (λ x → g)
 
 _→-𝔽_ : 𝔽 → 𝔽 → 𝔽
-A →-𝔽 B =
-  pair ( type-𝔽 A → type-𝔽 B)
-       ( is-finite-function-type (is-finite-type-𝔽 A) (is-finite-type-𝔽 B))
+pr1 (A →-𝔽 B) = type-𝔽 A → type-𝔽 B
+pr2 (A →-𝔽 B) =
+  is-finite-function-type (is-finite-type-𝔽 A) (is-finite-type-𝔽 B)
 
 is-finite-≃ :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} →
@@ -490,9 +486,8 @@ is-finite-≃ f g =
               ( λ x → is-finite-eq (has-decidable-equality-is-finite f)))))
 
 _≃-𝔽_ : 𝔽 → 𝔽 → 𝔽
-A ≃-𝔽 B =
-  pair ( type-𝔽 A ≃ type-𝔽 B)
-       ( is-finite-≃ (is-finite-type-𝔽 A) (is-finite-type-𝔽 B))
+pr1 (A ≃-𝔽 B) = type-𝔽 A ≃ type-𝔽 B
+pr2 (A ≃-𝔽 B) = is-finite-≃ (is-finite-type-𝔽 A) (is-finite-type-𝔽 B)
 
 Aut-𝔽 : 𝔽 → 𝔽
 Aut-𝔽 A = A ≃-𝔽 A
@@ -849,8 +844,8 @@ is-equiv-map-equiv-equiv-Maybe e =
 
 equiv-equiv-Maybe :
   {l1 l2 : Level} {X : UU l1} {Y : UU l2} → (Maybe X ≃ Maybe Y) → (X ≃ Y)
-equiv-equiv-Maybe e =
-  pair (map-equiv-equiv-Maybe e) (is-equiv-map-equiv-equiv-Maybe e)
+pr1 (equiv-equiv-Maybe e) = map-equiv-equiv-Maybe e
+pr2 (equiv-equiv-Maybe e) = is-equiv-map-equiv-equiv-Maybe e
 
 is-injective-Fin : {k l : ℕ} → (Fin k ≃ Fin l) → Id k l
 is-injective-Fin {zero-ℕ} {zero-ℕ} e = refl
@@ -1043,6 +1038,7 @@ count-base-count-Σ b e f =
     ( equiv-total-fib-map-section b)
     ( count-Σ e (count-fib-map-section b e f))
 
+{- !! Slow
 sum-number-of-elements-count-base-count-Σ :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} (b : (x : A) → B x) →
   (count-ΣAB : count (Σ A B)) (count-B : (x : A) → count (B x)) →
@@ -1067,6 +1063,7 @@ double-counting-base-count-Σ :
      ( number-of-elements-count count-A)
 double-counting-base-count-Σ b count-A count-B count-ΣAB =
   double-counting (count-base-count-Σ b count-ΣAB count-B) count-A
+-}
 
 section-count-base-count-Σ' :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} → count (Σ A B) →
@@ -1097,6 +1094,7 @@ count-base-count-Σ' {l1} {l2} {A} {B} e f g =
           ( number-of-elements-count (f x))
           ( zero-ℕ)))
 
+{- !! Slow
 sum-number-of-elements-count-base-count-Σ' :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} (count-ΣAB : count (Σ A B)) →
   ( count-B : (x : A) → count (B x)) →
@@ -1127,6 +1125,7 @@ double-counting-base-count-Σ' :
      ( number-of-elements-count count-A)
 double-counting-base-count-Σ' count-A count-B count-ΣAB count-nB =
   double-counting (count-base-count-Σ' count-ΣAB count-B count-nB) count-A
+-}
 
 is-left : {l1 l2 : Level} {X : UU l1} {Y : UU l2} → coprod X Y → UU lzero
 is-left (inl x) = unit
@@ -1197,47 +1196,44 @@ product-number-of-elements-prod count-AB a b =
     ( count-prod (count-left-factor count-AB b) (count-right-factor count-AB a))
     ( count-AB))
 
-ev-Maybe :
-  {l1 l2 : Level} {A : UU l1} {B : Maybe A → UU l2} →
-  ((x : Maybe A) → B x) → ((x : A) → B (unit-Maybe x)) × B exception-Maybe
-ev-Maybe h = pair (λ x → h (unit-Maybe x)) (h exception-Maybe)
+module _
+  {l1 l2 : Level} {A : UU l1} {B : Maybe A → UU l2}
+  where
 
-ind-Maybe :
-  {l1 l2 : Level} {A : UU l1} {B : Maybe A → UU l2} →
-  ((x : A) → B (unit-Maybe x)) × (B exception-Maybe) → (x : Maybe A) → B x
-ind-Maybe (pair h b) (inl x) = h x
-ind-Maybe (pair h b) (inr star) = b
+  ev-Maybe :
+    ((x : Maybe A) → B x) → ((x : A) → B (unit-Maybe x)) × B exception-Maybe
+  pr1 (ev-Maybe h) x = h (unit-Maybe x)
+  pr2 (ev-Maybe h) = h exception-Maybe
+  
+  ind-Maybe :
+    ((x : A) → B (unit-Maybe x)) × (B exception-Maybe) → (x : Maybe A) → B x
+  ind-Maybe (pair h b) (inl x) = h x
+  ind-Maybe (pair h b) (inr star) = b
 
-issec-ind-Maybe :
-  {l1 l2 : Level} {A : UU l1} {B : Maybe A → UU l2} →
-  (ev-Maybe {B = B} ∘ ind-Maybe {B = B}) ~ id
-issec-ind-Maybe (pair h b) = refl
+  issec-ind-Maybe : (ev-Maybe ∘ ind-Maybe) ~ id
+  issec-ind-Maybe (pair h b) = refl
 
-isretr-ind-Maybe' :
-  {l1 l2 : Level} {A : UU l1} {B : Maybe A → UU l2} (h : (x : Maybe A) → B x) →
-  (ind-Maybe (ev-Maybe h)) ~ h
-isretr-ind-Maybe' h (inl x) = refl
-isretr-ind-Maybe' h (inr star) = refl
+  isretr-ind-Maybe' :
+    (h : (x : Maybe A) → B x) → (ind-Maybe (ev-Maybe h)) ~ h
+  isretr-ind-Maybe' h (inl x) = refl
+  isretr-ind-Maybe' h (inr star) = refl
 
-isretr-ind-Maybe :
-  {l1 l2 : Level} {A : UU l1} {B : Maybe A → UU l2} →
-  (ind-Maybe {B = B} ∘ ev-Maybe {B = B}) ~ id
-isretr-ind-Maybe h = eq-htpy (isretr-ind-Maybe' h)
+  isretr-ind-Maybe : (ind-Maybe ∘ ev-Maybe) ~ id
+  isretr-ind-Maybe h = eq-htpy (isretr-ind-Maybe' h)
 
-dependent-universal-property-Maybe :
-  {l1 l2 : Level} {A : UU l1} {B : Maybe A → UU l2} →
-  is-equiv (ev-Maybe {B = B})
-dependent-universal-property-Maybe =
-  is-equiv-has-inverse
-    ind-Maybe
-    issec-ind-Maybe
-    isretr-ind-Maybe
+  dependent-universal-property-Maybe : is-equiv ev-Maybe
+  dependent-universal-property-Maybe =
+    is-equiv-has-inverse
+      ind-Maybe
+      issec-ind-Maybe
+      isretr-ind-Maybe
 
 equiv-dependent-universal-property-Maybe :
   {l1 l2 : Level} {A : UU l1} (B : Maybe A → UU l2) →
   ((x : Maybe A) → B x) ≃ (((x : A) → B (unit-Maybe x)) × B exception-Maybe)
-equiv-dependent-universal-property-Maybe B =
-  pair ev-Maybe dependent-universal-property-Maybe
+pr1 (equiv-dependent-universal-property-Maybe B) = ev-Maybe
+pr2 (equiv-dependent-universal-property-Maybe B) =
+  dependent-universal-property-Maybe
 
 equiv-universal-property-Maybe :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} → (Maybe A → B) ≃ ((A → B) × B)
@@ -1279,58 +1275,56 @@ is-prop-has-finite-cardinality =
 
 has-finite-cardinality-Prop :
   {l1 : Level} (X : UU l1) → UU-Prop l1
-has-finite-cardinality-Prop X =
-  pair (has-finite-cardinality X) (is-prop-has-finite-cardinality)
+pr1 (has-finite-cardinality-Prop X) = has-finite-cardinality X
+pr2 (has-finite-cardinality-Prop X) = is-prop-has-finite-cardinality
 
-is-finite-has-finite-cardinality :
-  {l : Level} {X : UU l} → has-finite-cardinality X → is-finite X
-is-finite-has-finite-cardinality {l} {X} (pair k K) =
-  apply-universal-property-trunc-Prop K
-    ( is-finite-Prop X)
-    ( is-finite-count ∘ (pair k))
+module _
+  {l : Level} {X : UU l}
+  where
+  
+  is-finite-has-finite-cardinality : has-finite-cardinality X → is-finite X
+  is-finite-has-finite-cardinality (pair k K) =
+    apply-universal-property-trunc-Prop K
+      ( is-finite-Prop X)
+      ( is-finite-count ∘ (pair k))
 
-is-finite-has-cardinality :
-  {l : Level} {X : UU l} {k : ℕ} → has-cardinality X k → is-finite X
-is-finite-has-cardinality {k = k} H =
-  is-finite-has-finite-cardinality (pair k H)
+  is-finite-has-cardinality : {k : ℕ} → has-cardinality X k → is-finite X
+  is-finite-has-cardinality {k} H =
+    is-finite-has-finite-cardinality (pair k H)
 
-has-finite-cardinality-count :
-  {l1  : Level} {X : UU l1} → count X → has-finite-cardinality X
-has-finite-cardinality-count e =
-  pair (number-of-elements-count e) (unit-trunc-Prop (equiv-count e))
+  has-finite-cardinality-count : count X → has-finite-cardinality X
+  pr1 (has-finite-cardinality-count e) = number-of-elements-count e
+  pr2 (has-finite-cardinality-count e) = unit-trunc-Prop (equiv-count e)
 
-has-finite-cardinality-is-finite :
-  {l1 : Level} {X : UU l1} → is-finite X → has-finite-cardinality X
-has-finite-cardinality-is-finite =
-  map-universal-property-trunc-Prop
-    ( has-finite-cardinality-Prop _)
-    ( has-finite-cardinality-count)
+  has-finite-cardinality-is-finite : is-finite X → has-finite-cardinality X
+  has-finite-cardinality-is-finite =
+    map-universal-property-trunc-Prop
+      ( has-finite-cardinality-Prop X)
+      ( has-finite-cardinality-count)
 
-number-of-elements-is-finite :
-  {l1 : Level} {X : UU l1} → is-finite X → ℕ
-number-of-elements-is-finite =
-  number-of-elements-has-finite-cardinality ∘ has-finite-cardinality-is-finite
+  number-of-elements-is-finite : is-finite X → ℕ
+  number-of-elements-is-finite =
+    number-of-elements-has-finite-cardinality ∘ has-finite-cardinality-is-finite
 
-mere-equiv-is-finite :
-  {l1 : Level} {X : UU l1} (f : is-finite X) →
-  mere-equiv (Fin (number-of-elements-is-finite f)) X
-mere-equiv-is-finite f =
-  mere-equiv-has-finite-cardinality (has-finite-cardinality-is-finite f)
+  mere-equiv-is-finite :
+    (f : is-finite X) → mere-equiv (Fin (number-of-elements-is-finite f)) X
+  mere-equiv-is-finite f =
+    mere-equiv-has-finite-cardinality (has-finite-cardinality-is-finite f)
 
-compute-number-of-elements-is-finite :
-  {l1 : Level} {X : UU l1} (e : count X) (f : is-finite X) →
-  Id (number-of-elements-count e) (number-of-elements-is-finite f)
-compute-number-of-elements-is-finite e f =
-  ind-trunc-Prop
-    ( λ g → Id-Prop ℕ-Set ( number-of-elements-count e)
-                          ( number-of-elements-is-finite g))
-    ( λ g →
-      ( is-injective-Fin ((inv-equiv (equiv-count g)) ∘e (equiv-count e))) ∙
-      ( ap pr1
-        ( eq-is-prop' is-prop-has-finite-cardinality
-          ( has-finite-cardinality-count g)
-          ( has-finite-cardinality-is-finite (unit-trunc-Prop g)))))
-    ( f)
+  compute-number-of-elements-is-finite :
+    (e : count X) (f : is-finite X) →
+    Id (number-of-elements-count e) (number-of-elements-is-finite f)
+  compute-number-of-elements-is-finite e f =
+    ind-trunc-Prop
+      ( λ g → Id-Prop ℕ-Set ( number-of-elements-count e)
+                            ( number-of-elements-is-finite g))
+      ( λ g →
+        ( is-injective-Fin ((inv-equiv (equiv-count g)) ∘e (equiv-count e))) ∙
+        ( ap pr1
+          ( eq-is-prop' is-prop-has-finite-cardinality
+            ( has-finite-cardinality-count g)
+            ( has-finite-cardinality-is-finite (unit-trunc-Prop g)))))
+      ( f)
 
 is-finite-empty : is-finite empty
 is-finite-empty = is-finite-count count-empty
@@ -1340,19 +1334,23 @@ is-finite-is-empty :
 is-finite-is-empty H = is-finite-count (count-is-empty H)
 
 empty-𝔽 : 𝔽
-empty-𝔽 = pair empty (is-finite-is-empty id)
+pr1 empty-𝔽 = empty
+pr2 empty-𝔽 = is-finite-is-empty id
 
 empty-UU-Fin : UU-Fin zero-ℕ
-empty-UU-Fin = pair empty (unit-trunc-Prop equiv-id)
+pr1 empty-UU-Fin = empty
+pr2 empty-UU-Fin = unit-trunc-Prop equiv-id
 
 is-finite-unit : is-finite unit
 is-finite-unit = is-finite-count count-unit
 
 unit-𝔽 : 𝔽
-unit-𝔽 = pair unit is-finite-unit
+pr1 unit-𝔽 = unit
+pr2 unit-𝔽 = is-finite-unit
 
 unit-UU-Fin : UU-Fin one-ℕ
-unit-UU-Fin = pair unit (unit-trunc-Prop (left-unit-law-coprod unit))
+pr1 unit-UU-Fin = unit
+pr2 unit-UU-Fin = unit-trunc-Prop (left-unit-law-coprod unit)
 
 is-finite-is-contr :
   {l1 : Level} {X : UU l1} → is-contr X → is-finite X
@@ -1370,10 +1368,12 @@ is-finite-Fin : {k : ℕ} → is-finite (Fin k)
 is-finite-Fin {k} = is-finite-count (count-Fin k)
 
 Fin-𝔽 : ℕ → 𝔽
-Fin-𝔽 k = pair (Fin k) (is-finite-Fin)
+pr1 (Fin-𝔽 k) = Fin k
+pr2 (Fin-𝔽 k) = is-finite-Fin
 
 Fin-UU-Fin : (k : ℕ) → UU-Fin k
-Fin-UU-Fin k = pair (Fin k) (unit-trunc-Prop equiv-id)
+pr1 (Fin-UU-Fin k) = Fin k
+pr2 (Fin-UU-Fin k) = unit-trunc-Prop equiv-id
 
 raise-Fin : (l : Level) (k : ℕ) → UU l
 raise-Fin l k = raise l (Fin k)
@@ -1385,8 +1385,8 @@ map-raise-Fin : (l : Level) (k : ℕ) → Fin k → raise-Fin l k
 map-raise-Fin l k = map-raise
 
 Fin-UU-Fin-Level : (l : Level) (k : ℕ) → UU-Fin-Level l k
-Fin-UU-Fin-Level l k =
-  pair (raise-Fin l k) (unit-trunc-Prop (equiv-raise-Fin l k))
+pr1 (Fin-UU-Fin-Level l k) = raise-Fin l k
+pr2 (Fin-UU-Fin-Level l k) = unit-trunc-Prop (equiv-raise-Fin l k)
 
 is-inhabited-or-empty : {l1 : Level} → UU l1 → UU l1
 is-inhabited-or-empty A = coprod (type-trunc-Prop A) (is-empty A)
@@ -1400,8 +1400,8 @@ is-prop-is-inhabited-or-empty A =
     ( is-prop-neg)
 
 is-inhabited-or-empty-Prop : {l1 : Level} → UU l1 → UU-Prop l1
-is-inhabited-or-empty-Prop A =
-  pair (is-inhabited-or-empty A) (is-prop-is-inhabited-or-empty A)
+pr1 (is-inhabited-or-empty-Prop A) = is-inhabited-or-empty A
+pr2 (is-inhabited-or-empty-Prop A) = is-prop-is-inhabited-or-empty A
 
 is-inhabited-or-empty-count :
   {l1 : Level} {A : UU l1} → count A → is-inhabited-or-empty A

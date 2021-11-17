@@ -29,7 +29,8 @@ is-prop-type-trunc-Prop {l} {A} =
   is-prop-all-elements-equal all-elements-equal-type-trunc-Prop
 
 trunc-Prop : {l : Level} → UU l → UU-Prop l
-trunc-Prop A = pair (type-trunc-Prop A) is-prop-type-trunc-Prop
+pr1 (trunc-Prop A) = type-trunc-Prop A
+pr2 (trunc-Prop A) = is-prop-type-trunc-Prop
 
 extension-property-propositional-truncation :
   ( l : Level) {l1 l2 : Level} {A : UU l1} (P : UU-Prop l2) →
@@ -219,13 +220,12 @@ map-inv-equiv-trunc-Prop e = map-equiv-trunc-Prop (inv-equiv e)
 equiv-trunc-Prop :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} →
   (A ≃ B) → (type-trunc-Prop A ≃ type-trunc-Prop B)
-equiv-trunc-Prop e =
-  pair
-    ( map-equiv-trunc-Prop e)
-    ( is-equiv-is-prop
-      ( is-prop-type-trunc-Prop)
-      ( is-prop-type-trunc-Prop)
-      ( map-inv-equiv-trunc-Prop e))
+pr1 (equiv-trunc-Prop e) = map-equiv-trunc-Prop e
+pr2 (equiv-trunc-Prop e) =
+  is-equiv-is-prop
+    ( is-prop-type-trunc-Prop)
+    ( is-prop-type-trunc-Prop)
+    ( map-inv-equiv-trunc-Prop e)
 
 is-propositional-truncation-prod :
   {l1 l2 l3 l4 : Level}
@@ -359,9 +359,8 @@ is-equiv-map-distributive-trunc-prod-Prop {l1} {l2} {A} {B} =
 distributive-trunc-prod-Prop :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} →
   type-trunc-Prop (A × B) ≃ (type-trunc-Prop A × type-trunc-Prop B)
-distributive-trunc-prod-Prop =
-  pair map-distributive-trunc-prod-Prop
-       is-equiv-map-distributive-trunc-prod-Prop
+pr1 distributive-trunc-prod-Prop = map-distributive-trunc-prod-Prop
+pr2 distributive-trunc-prod-Prop = is-equiv-map-distributive-trunc-prod-Prop
 
 is-equiv-map-inv-distributive-trunc-prod-Prop :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} →
@@ -375,9 +374,10 @@ is-equiv-map-inv-distributive-trunc-prod-Prop {l1} {l2} {A} {B} =
 inv-distributive-trunc-prod-Prop :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} →
   ( type-trunc-Prop A × type-trunc-Prop B) ≃ type-trunc-Prop (A × B)
-inv-distributive-trunc-prod-Prop =
-  pair map-inv-distributive-trunc-prod-Prop
-       is-equiv-map-inv-distributive-trunc-prod-Prop
+pr1 inv-distributive-trunc-prod-Prop =
+  map-inv-distributive-trunc-prod-Prop
+pr2 inv-distributive-trunc-prod-Prop =
+  is-equiv-map-inv-distributive-trunc-prod-Prop
 
 mere-eq-Prop :
   {l : Level} {A : UU l} → A → A → UU-Prop l
@@ -444,8 +444,8 @@ is-prop-is-decidable is-prop-A =
 
 is-decidable-Prop :
   {l : Level} → UU-Prop l → UU-Prop l
-is-decidable-Prop P =
-  pair (is-decidable (type-Prop P)) (is-prop-is-decidable (is-prop-type-Prop P))
+pr1 (is-decidable-Prop P) = is-decidable (type-Prop P)
+pr2 (is-decidable-Prop P) = is-prop-is-decidable (is-prop-type-Prop P)
 
 is-empty-type-trunc-Prop :
   {l1 : Level} {X : UU l1} → is-empty X → is-empty (type-trunc-Prop X)
@@ -476,8 +476,8 @@ is-prop-minimal-element-ℕ H =
 
 minimal-element-ℕ-Prop :
   {l1 : Level} {P : ℕ → UU l1} → ((x : ℕ) → is-prop (P x)) → UU-Prop l1
-minimal-element-ℕ-Prop {l1} {P} H =
-  pair (minimal-element-ℕ P) (is-prop-minimal-element-ℕ H)
+pr1 (minimal-element-ℕ-Prop {l1} {P} H) = minimal-element-ℕ P
+pr2 (minimal-element-ℕ-Prop {l1} {P} H) = is-prop-minimal-element-ℕ H
 
 global-choice-decidable-subtype-ℕ :
   {l1 : Level} {P : ℕ → UU l1} (H : (x : ℕ) → is-prop (P x))
@@ -539,11 +539,11 @@ module _
   equiv-dependent-universal-property-trunc-Prop :
     ((y : type-trunc-Prop A) → type-Prop (P y)) ≃
     ((x : A) → type-Prop (P (unit-trunc-Prop x)))
-  equiv-dependent-universal-property-trunc-Prop =
-    pair
-      ( precomp-Π unit-trunc-Prop (type-Prop ∘ P))
-      ( dependent-universal-property-trunc-Prop P)
-
+  pr1 equiv-dependent-universal-property-trunc-Prop =
+    precomp-Π unit-trunc-Prop (type-Prop ∘ P)
+  pr2 equiv-dependent-universal-property-trunc-Prop =
+    dependent-universal-property-trunc-Prop P
+  
   apply-dependent-universal-property-trunc-Prop :
     (y : type-trunc-Prop A) → ((x : A) → type-Prop (P (unit-trunc-Prop x))) →
     type-Prop (P y)
@@ -559,13 +559,12 @@ precomp-emb :
   {B : UU l3} ( i : B ↪ X) (q : hom-slice f (map-emb i)) →
   {C : UU l4} ( j : C ↪ X) →
   hom-slice (map-emb i) (map-emb j) → hom-slice f (map-emb j)
-precomp-emb f i q j r =
-  pair
-    ( ( map-hom-slice (map-emb i) (map-emb j) r) ∘
-      ( map-hom-slice f (map-emb i) q))
-    ( ( triangle-hom-slice f (map-emb i) q) ∙h
-      ( ( triangle-hom-slice (map-emb i) (map-emb j) r) ·r
-        ( map-hom-slice f (map-emb i) q)))
+pr1 (precomp-emb f i q j r) =
+  ( map-hom-slice (map-emb i) (map-emb j) r) ∘ (map-hom-slice f (map-emb i) q)
+pr2 (precomp-emb f i q j r) =
+  ( triangle-hom-slice f (map-emb i) q) ∙h
+  ( ( triangle-hom-slice (map-emb i) (map-emb j) r) ·r
+    ( map-hom-slice f (map-emb i) q))
 
 is-image :
   ( l : Level) {l1 l2 l3 : Level} {X : UU l1} {A : UU l2} (f : A → X) →
@@ -589,16 +588,19 @@ module _
   inclusion-im = pr1
 
   map-unit-im : A → im
-  map-unit-im a = pair (f a) (unit-trunc-Prop (pair a refl))
+  pr1 (map-unit-im a) = f a
+  pr2 (map-unit-im a) = unit-trunc-Prop (pair a refl)
 
   triangle-unit-im : f ~ (inclusion-im ∘ map-unit-im)
   triangle-unit-im a = refl
 
   unit-im : hom-slice f inclusion-im
-  unit-im = pair map-unit-im triangle-unit-im
+  pr1 unit-im = map-unit-im
+  pr2 unit-im = triangle-unit-im
 
   hom-slice-im : hom-slice f inclusion-im
-  hom-slice-im = pair map-unit-im triangle-unit-im
+  pr1 hom-slice-im = map-unit-im
+  pr2 hom-slice-im = triangle-unit-im
 
   Eq-im : im → im → UU l1
   Eq-im x y = Id (pr1 x) (pr1 y)
@@ -627,7 +629,8 @@ module _
       ( Eq-eq-im x)
 
   equiv-Eq-eq-im : (x y : im) → Id x y ≃ Eq-im x y
-  equiv-Eq-eq-im x y = pair (Eq-eq-im x y) (is-equiv-Eq-eq-im x y)
+  pr1 (equiv-Eq-eq-im x y) = Eq-eq-im x y
+  pr2 (equiv-Eq-eq-im x y) = is-equiv-Eq-eq-im x y
 
   eq-Eq-im : (x y : im) → Eq-im x y → Id x y
   eq-Eq-im x y = map-inv-is-equiv (is-equiv-Eq-eq-im x y)
@@ -640,7 +643,8 @@ is-emb-inclusion-im f =
 
 emb-im :
   {l1 l2 : Level} {X : UU l1} {A : UU l2} (f : A → X) → im f ↪ X
-emb-im f = pair (inclusion-im f) (is-emb-inclusion-im f)
+pr1 (emb-im f) = inclusion-im f
+pr2 (emb-im f) = is-emb-inclusion-im f
 
 is-injective-inclusion-im :
   {l1 l2 : Level} {X : UU l1} {A : UU l2} (f : A → X) →
@@ -790,10 +794,9 @@ equiv-dependent-universal-property-surj-is-surjective :
   {l l1 l2 : Level} {A : UU l1} {B : UU l2} (f : A → B) →
   is-surjective f → (C : B → UU-Prop l) →
   ((b : B) → type-Prop (C b)) ≃ ((a : A) → type-Prop (C (f a)))
-equiv-dependent-universal-property-surj-is-surjective f H C =
-  pair
-    ( λ h x → h (f x))
-    ( dependent-universal-property-surj-is-surjective f H C)
+pr1 (equiv-dependent-universal-property-surj-is-surjective f H C) h x = h (f x)
+pr2 (equiv-dependent-universal-property-surj-is-surjective f H C) =
+  dependent-universal-property-surj-is-surjective f H C
 
 is-image-is-surjective' :
   {l1 l2 l3 : Level} {A : UU l1} {B : UU l2} {X : UU l3}
@@ -828,11 +831,11 @@ comp-hom-slice :
   {l1 l2 l3 l4 : Level} {X : UU l1} {A : UU l2} {B : UU l3} {C : UU l4}
   (f : A → X) (g : B → X) (h : C → X) →
   hom-slice g h → hom-slice f g → hom-slice f h
-comp-hom-slice f g h j i =
-  pair ( ( map-hom-slice g h j) ∘
-         ( map-hom-slice f g i))
-       ( ( triangle-hom-slice f g i) ∙h
-         ( (triangle-hom-slice g h j) ·r (map-hom-slice f g i)))
+pr1 (comp-hom-slice f g h j i) =
+  ( map-hom-slice g h j) ∘ (map-hom-slice f g i)
+pr2 (comp-hom-slice f g h j i) =
+  ( triangle-hom-slice f g i) ∙h
+  ( (triangle-hom-slice g h j) ·r (map-hom-slice f g i))
 
 module _
   {l1 l2 l3 l4 : Level} {X : UU l1} {A : UU l2} (f : A → X)
@@ -1063,9 +1066,9 @@ module _
     is-equiv-map-equiv (pr1 equiv-slice-uniqueness-image)
 
   equiv-equiv-slice-uniqueness-image : B ≃ B'
-  equiv-equiv-slice-uniqueness-image =
-    pair map-hom-equiv-slice-uniqueness-image
-         is-equiv-map-hom-equiv-slice-uniqueness-image
+  pr1 equiv-equiv-slice-uniqueness-image = map-hom-equiv-slice-uniqueness-image
+  pr2 equiv-equiv-slice-uniqueness-image =
+    is-equiv-map-hom-equiv-slice-uniqueness-image
 
   triangle-hom-equiv-slice-uniqueness-image :
     (map-emb i) ~ (map-emb i' ∘ map-hom-equiv-slice-uniqueness-image)
@@ -1177,9 +1180,9 @@ module _
     is-equiv-map-equiv (pr1 equiv-slice-uniqueness-im)
 
   equiv-equiv-slice-uniqueness-im : im f ≃ B
-  equiv-equiv-slice-uniqueness-im =
-    pair map-hom-equiv-slice-uniqueness-im
-         is-equiv-map-hom-equiv-slice-uniqueness-im
+  pr1 equiv-equiv-slice-uniqueness-im = map-hom-equiv-slice-uniqueness-im
+  pr2 equiv-equiv-slice-uniqueness-im =
+    is-equiv-map-hom-equiv-slice-uniqueness-im
 
   triangle-hom-equiv-slice-uniqueness-im :
     (inclusion-im f) ~ (map-emb i ∘ map-hom-equiv-slice-uniqueness-im)

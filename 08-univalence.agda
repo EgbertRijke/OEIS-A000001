@@ -2,7 +2,7 @@
 
 module 08-univalence where
 
-open import 07-finite-types
+open import 07-finite-types public
 
 equiv-eq : {i : Level} {A : UU i} {B : UU i} → Id A B → A ≃ B
 equiv-eq refl = equiv-id
@@ -20,52 +20,60 @@ UNIVALENCE-is-contr-total-equiv : {i : Level} (A : UU i) →
 UNIVALENCE-is-contr-total-equiv A c =
   fundamental-theorem-id A equiv-id c (λ B → equiv-eq)
 
-ev-id : {i j : Level} {A : UU i} (P : (B : UU i) → (A ≃ B) → UU j) →
-  ((B : UU i) (e : A ≃ B) → P B e) → P A equiv-id
-ev-id {A = A} P f = f A equiv-id
+module _
+  {l1 : Level} {A : UU l1}
+  where
 
-IND-EQUIV : {i j : Level} {A : UU i} → ((B : UU i) (e : A ≃ B) → UU j) → UU _
-IND-EQUIV P = sec (ev-id P)
-
-triangle-ev-id : {i j : Level} {A : UU i}
-  (P : (Σ (UU i) (λ X → A ≃ X)) → UU j) →
-  (ev-pt (pair A equiv-id) P)
-  ~ ((ev-id (λ X e → P (pair X e))) ∘ (ev-pair {A = UU i} {B = λ X → A ≃ X} {C = P}))
-triangle-ev-id P f = refl
-
-IND-EQUIV-is-contr-total-equiv : {i j : Level} (A : UU i) →
-  is-contr (Σ (UU i) (λ X → A ≃ X)) →
-  (P : (Σ (UU i) (λ X → A ≃ X)) → UU j) → IND-EQUIV (λ B e → P (pair B e))
-IND-EQUIV-is-contr-total-equiv {i} {j} A c P =
-  section-comp
-    ( ev-pt (pair A equiv-id) P)
-    ( ev-id (λ X e → P (pair X e)))
-    ( ev-pair)
-    ( triangle-ev-id P)
-    ( pair ind-Σ refl-htpy)
-    ( is-singleton-is-contr
-      ( pair A equiv-id)
-      ( pair
-        ( pair A equiv-id)
-        ( λ t →  ( inv (contraction c (pair A equiv-id))) ∙
-                 ( contraction c t)))
-      ( P))
-
-is-contr-total-equiv-IND-EQUIV : {i : Level} (A : UU i) →
-  ( {j : Level} (P : (Σ (UU i) (λ X → A ≃ X)) → UU j) →
-    IND-EQUIV (λ B e → P (pair B e))) →
-  is-contr (Σ (UU i) (λ X → A ≃ X))
-is-contr-total-equiv-IND-EQUIV {i} A ind =
-  is-contr-is-singleton
-    ( Σ (UU i) (λ X → A ≃ X))
-    ( pair A equiv-id)
-    ( λ P → section-comp'
+  ev-id :
+    { l : Level} (P : (B : UU l1) → (A ≃ B) → UU l) →
+    ( (B : UU l1) (e : A ≃ B) → P B e) → P A equiv-id
+  ev-id P f = f A equiv-id
+  
+  IND-EQUIV : {l : Level} (P : (B : UU l1) (e : A ≃ B) → UU l) → UU _
+  IND-EQUIV P = sec (ev-id P)
+  
+  triangle-ev-id :
+    { l : Level}
+    ( P : (Σ (UU l1) (λ X → A ≃ X)) → UU l) →
+    ( ev-pt (pair A equiv-id) P) ~
+    ( ( ev-id (λ X e → P (pair X e))) ∘
+      ( ev-pair {A = UU l1} {B = λ X → A ≃ X} {C = P}))
+  triangle-ev-id P f = refl
+  
+  IND-EQUIV-is-contr-total-equiv :
+    is-contr (Σ (UU l1) (λ X → A ≃ X)) →
+    {l : Level} →
+    (P : (Σ (UU l1) (λ X → A ≃ X)) → UU l) → IND-EQUIV (λ B e → P (pair B e))
+  IND-EQUIV-is-contr-total-equiv c P =
+    section-comp
       ( ev-pt (pair A equiv-id) P)
       ( ev-id (λ X e → P (pair X e)))
-      ( ev-pair {A = UU i} {B = λ X → A ≃ X} {C = P})
+      ( ev-pair)
       ( triangle-ev-id P)
       ( pair ind-Σ refl-htpy)
-      ( ind P))
+      ( is-singleton-is-contr
+        ( pair A equiv-id)
+        ( pair
+          ( pair A equiv-id)
+          ( λ t →  ( inv (contraction c (pair A equiv-id))) ∙
+                   ( contraction c t)))
+        ( P))
+
+  is-contr-total-equiv-IND-EQUIV :
+    ( {l : Level} (P : (Σ (UU l1) (λ X → A ≃ X)) → UU l) →
+      IND-EQUIV (λ B e → P (pair B e))) →
+    is-contr (Σ (UU l1) (λ X → A ≃ X))
+  is-contr-total-equiv-IND-EQUIV ind =
+    is-contr-is-singleton
+      ( Σ (UU l1) (λ X → A ≃ X))
+      ( pair A equiv-id)
+      ( λ P → section-comp'
+        ( ev-pt (pair A equiv-id) P)
+        ( ev-id (λ X e → P (pair X e)))
+        ( ev-pair {A = UU l1} {B = λ X → A ≃ X} {C = P})
+        ( triangle-ev-id P)
+        ( pair ind-Σ refl-htpy)
+        ( ind P))
 
 postulate univalence : {i : Level} (A B : UU i) → UNIVALENCE A B
 
@@ -74,7 +82,8 @@ eq-equiv A B = map-inv-is-equiv (univalence A B)
 
 equiv-univalence :
   {i : Level} {A B : UU i} → Id A B ≃ (A ≃ B)
-equiv-univalence = pair equiv-eq (univalence _ _)
+pr1 equiv-univalence = equiv-eq
+pr2 equiv-univalence = univalence _ _
 
 is-contr-total-equiv : {i : Level} (A : UU i) →
   is-contr (Σ (UU i) (λ X → A ≃ X))
@@ -167,7 +176,8 @@ eq-equiv-UU-Contr :
 eq-equiv-UU-Contr = eq-equiv-subuniverse is-contr-Prop
 
 center-UU-contr : (l : Level) → UU-Contr l
-center-UU-contr l = pair (raise-unit l) is-contr-raise-unit
+pr1 (center-UU-contr l) = raise-unit l
+pr2 (center-UU-contr l) = is-contr-raise-unit
 
 contraction-UU-contr :
   {l : Level} (A : UU-Contr l) → Id (center-UU-contr l) A
@@ -176,7 +186,8 @@ contraction-UU-contr A =
     ( equiv-is-contr is-contr-raise-unit (is-contr-type-UU-Contr A))
 
 is-contr-UU-Contr : (l : Level) → is-contr (UU-Contr l)
-is-contr-UU-Contr l = pair (center-UU-contr l) contraction-UU-contr
+pr1 (is-contr-UU-Contr l) = center-UU-contr l
+pr2 (is-contr-UU-Contr l) = contraction-UU-contr
 
 UU-Trunc : (k : 𝕋) (l : Level) → UU (lsuc l)
 UU-Trunc k l = Σ (UU l) (is-trunc k)
@@ -206,7 +217,8 @@ is-set-UU-Prop : (l : Level) → is-set (UU-Prop l)
 is-set-UU-Prop l = is-trunc-UU-Trunc (neg-one-𝕋) l
 
 UU-Prop-Set : (l : Level) → UU-Set (lsuc l)
-UU-Prop-Set l = pair (UU-Prop l) (is-set-UU-Prop l)
+pr1 (UU-Prop-Set l) = UU-Prop l
+pr2 (UU-Prop-Set l) = is-set-UU-Prop l
 
 is-contr-total-iff :
   {l1 : Level} (P : UU-Prop l1) → is-contr (Σ (UU-Prop l1) (λ Q → P ⇔ Q))
@@ -223,7 +235,8 @@ is-contr-total-iff {l1} P =
 
 iff-eq :
   {l1 : Level} {P Q : UU-Prop l1} → Id P Q → P ⇔ Q
-iff-eq refl = pair id id
+pr1 (iff-eq refl) = id
+pr2 (iff-eq refl) = id
 
 is-equiv-iff-eq :
   {l1 : Level} (P Q : UU-Prop l1) → is-equiv (iff-eq {l1} {P} {Q})
@@ -445,10 +458,10 @@ eq-equiv-UU-Fin X Y = eq-equiv-component-UU X Y
 equiv-equiv-eq-UU-Fin-Level :
   {l : Level} {k : ℕ} (X Y : UU-Fin-Level l k) →
   Id X Y ≃ equiv-UU-Fin-Level X Y
-equiv-equiv-eq-UU-Fin-Level X Y =
-  pair equiv-eq-UU-Fin-Level (is-equiv-equiv-eq-UU-Fin-Level X Y)
+pr1 (equiv-equiv-eq-UU-Fin-Level X Y) = equiv-eq-UU-Fin-Level
+pr2 (equiv-equiv-eq-UU-Fin-Level X Y) = is-equiv-equiv-eq-UU-Fin-Level X Y
 
 equiv-equiv-eq-UU-Fin :
   {k : ℕ} (X Y : UU-Fin k) → Id X Y ≃ equiv-UU-Fin X Y
-equiv-equiv-eq-UU-Fin X Y =
-  pair equiv-eq-UU-Fin (is-equiv-equiv-eq-UU-Fin X Y)
+pr1 (equiv-equiv-eq-UU-Fin X Y) = equiv-eq-UU-Fin
+pr2 (equiv-equiv-eq-UU-Fin X Y) = is-equiv-equiv-eq-UU-Fin X Y

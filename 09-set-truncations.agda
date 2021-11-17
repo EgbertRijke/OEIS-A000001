@@ -40,7 +40,8 @@ is-prop-is-small l A =
 
 is-small-Prop :
   (l : Level) {l1 : Level} (A : UU l1) → UU-Prop (lsuc l ⊔ l1)
-is-small-Prop l A = pair (is-small l A) (is-prop-is-small l A)
+pr1 (is-small-Prop l A) = is-small l A
+pr2 (is-small-Prop l A) = is-prop-is-small l A
 
 Rel-Prop :
   (l : Level) {l1 : Level} (A : UU l1) → UU ((lsuc l) ⊔ l1)
@@ -165,15 +166,14 @@ is-set-set-quotient {l1} {l2} R =
 
 quotient-Set :
   {l1 l2 : Level} {A : UU l1} (R : Eq-Rel l2 A) → UU-Set (l1 ⊔ lsuc l2)
-quotient-Set R = pair (set-quotient R) (is-set-set-quotient R)
+pr1 (quotient-Set R) = set-quotient R
+pr2 (quotient-Set R) = is-set-set-quotient R
 
 center-total-class-Eq-Rel :
   {l1 l2 : Level} {A : UU l1} (R : Eq-Rel l2 A) (x : A) →
   Σ (set-quotient R) (λ P → type-class-set-quotient R P x)
-center-total-class-Eq-Rel R x =
-  pair
-    ( map-set-quotient R x)
-    ( refl-Eq-Rel R)
+pr1 (center-total-class-Eq-Rel R x) = map-set-quotient R x
+pr2 (center-total-class-Eq-Rel R x) = refl-Eq-Rel R
 
 contraction-total-class-Eq-Rel :
   {l1 l2 : Level} {A : UU l1} (R : Eq-Rel l2 A) (a : A) →
@@ -201,10 +201,8 @@ is-contr-total-class-Eq-Rel :
   {l1 l2 : Level} {A : UU l1} (R : Eq-Rel l2 A) (a : A) →
   is-contr
     ( Σ (set-quotient R) (λ P → type-class-set-quotient R P a))
-is-contr-total-class-Eq-Rel R a =
-  pair
-    ( center-total-class-Eq-Rel R a)
-    ( contraction-total-class-Eq-Rel R a)
+pr1 (is-contr-total-class-Eq-Rel R a) = center-total-class-Eq-Rel R a
+pr2 (is-contr-total-class-Eq-Rel R a) = contraction-total-class-Eq-Rel R a
 
 related-eq-quotient :
   {l1 l2 : Level} {A : UU l1} (R : Eq-Rel l2 A) (a : A)
@@ -226,8 +224,8 @@ effective-quotient' :
   {l1 l2 : Level} {A : UU l1} (R : Eq-Rel l2 A) (a : A)
   (q : set-quotient R) →
   Id (map-set-quotient R a) q ≃ type-class-set-quotient R q a
-effective-quotient' R a q =
-  pair (related-eq-quotient R a q) (is-equiv-related-eq-quotient R a q)
+pr1 (effective-quotient' R a q) = related-eq-quotient R a q
+pr2 (effective-quotient' R a q) = is-equiv-related-eq-quotient R a q
 
 eq-effective-quotient' :
   {l1 l2 : Level} {A : UU l1} (R : Eq-Rel l2 A) (a : A)
@@ -332,17 +330,16 @@ module _
   equiv-htpy-eq-reflecting-map-Eq-Rel :
     (g : reflecting-map-Eq-Rel R (type-Set B)) →
     Id f g ≃ htpy-reflecting-map-Eq-Rel g
-  equiv-htpy-eq-reflecting-map-Eq-Rel g =
-    pair
-      ( htpy-eq-reflecting-map-Eq-Rel g)
-      ( is-equiv-htpy-eq-reflecting-map-Eq-Rel g)
+  pr1 (equiv-htpy-eq-reflecting-map-Eq-Rel g) = htpy-eq-reflecting-map-Eq-Rel g
+  pr2 (equiv-htpy-eq-reflecting-map-Eq-Rel g) =
+    is-equiv-htpy-eq-reflecting-map-Eq-Rel g
 
 precomp-Set-Quotient :
   {l l1 l2 l3 : Level} {A : UU l1} (R : Eq-Rel l2 A)
   (B : UU-Set l3) (f : reflecting-map-Eq-Rel R (type-Set B)) →
   (X : UU-Set l) → (type-hom-Set B X) → reflecting-map-Eq-Rel R (type-Set X)
-precomp-Set-Quotient R B f X g =
-  pair (g ∘ (pr1 f)) (λ r → ap g (pr2 f r))
+pr1 (precomp-Set-Quotient R B f X g) = g ∘ (pr1 f)
+pr2 (precomp-Set-Quotient R B f X g) r = ap g (pr2 f r)
 
 precomp-id-Set-Quotient :
   {l1 l2 l3 : Level} {A : UU l1} (R : Eq-Rel l2 A) (B : UU-Set l3)
@@ -546,11 +543,11 @@ module _
     (T : (prop-Eq-Rel R) ~ ((map-emb i) ∘ q)) →
     ({l : Level} → is-image l (prop-Eq-Rel R) i (pair q T)) →
     is-surjective-and-effective R q
-  is-surjective-and-effective-is-image i T H =
-    pair
-      ( is-surjective-is-image (prop-Eq-Rel R) i (pair q T) H)
-      ( is-effective-is-image i T H)
-
+  pr1 (is-surjective-and-effective-is-image i T H) =
+    is-surjective-is-image (prop-Eq-Rel R) i (pair q T) H
+  pr2 (is-surjective-and-effective-is-image i T H) =
+    is-effective-is-image i T H
+  
   is-locally-small-is-surjective-and-effective :
     is-surjective-and-effective R q → is-locally-small l2 (type-Set B)
   is-locally-small-is-surjective-and-effective e x y =
@@ -564,81 +561,85 @@ module _
           ( α u))
     where
     α : fib q x → fib q y → is-small l2 (Id x y)
-    α (pair a refl) (pair b refl) =
-      pair (type-Eq-Rel R a b) (pr2 e a b)
+    pr1 (α (pair a refl) (pair b refl)) = type-Eq-Rel R a b
+    pr2 (α (pair a refl) (pair b refl)) = pr2 e a b
 
   large-map-emb-is-surjective-and-effective :
     is-surjective-and-effective R q → type-Set B → A → UU-Prop l3
   large-map-emb-is-surjective-and-effective H b a = Id-Prop B b (q a)
+  
+  abstract
+    small-map-emb-is-surjective-and-effective :
+      is-surjective-and-effective R q → type-Set B → A →
+      Σ (UU-Prop l3) (λ P → is-small l2 (type-Prop P))
+    pr1 (small-map-emb-is-surjective-and-effective H b a) =
+      large-map-emb-is-surjective-and-effective H b a
+    pr2 (small-map-emb-is-surjective-and-effective H b a) =
+      is-locally-small-is-surjective-and-effective H b (q a)
+  
+    map-emb-is-surjective-and-effective :
+      is-surjective-and-effective R q → type-Set B → A → UU-Prop l2
+    pr1 (map-emb-is-surjective-and-effective H b a) =
+      pr1 (pr2 (small-map-emb-is-surjective-and-effective H b a))
+    pr2 (map-emb-is-surjective-and-effective H b a) =
+      is-prop-equiv'
+        ( type-Prop (large-map-emb-is-surjective-and-effective H b a))
+        ( pr2 (pr2 (small-map-emb-is-surjective-and-effective H b a)))
+        ( is-prop-type-Prop
+          ( large-map-emb-is-surjective-and-effective H b a))
 
-  small-map-emb-is-surjective-and-effective :
-    is-surjective-and-effective R q → type-Set B → A →
-    Σ (UU-Prop l3) (λ P → is-small l2 (type-Prop P))
-  small-map-emb-is-surjective-and-effective H b a =
-    pair ( large-map-emb-is-surjective-and-effective H b a)
-         ( is-locally-small-is-surjective-and-effective H b (q a))
+    compute-map-emb-is-surjective-and-effective :
+      (H : is-surjective-and-effective R q) (b : type-Set B) (a : A) →
+      type-Prop (large-map-emb-is-surjective-and-effective H b a) ≃
+      type-Prop (map-emb-is-surjective-and-effective H b a) 
+    compute-map-emb-is-surjective-and-effective H b a =
+      pr2 (pr2 (small-map-emb-is-surjective-and-effective H b a))
 
-  map-emb-is-surjective-and-effective :
-    is-surjective-and-effective R q → type-Set B → A → UU-Prop l2
-  map-emb-is-surjective-and-effective H b a =
-    pair ( pr1 (pr2 (small-map-emb-is-surjective-and-effective H b a)))
-         ( is-prop-equiv'
-           ( type-Prop (large-map-emb-is-surjective-and-effective H b a))
-           ( pr2 (pr2 (small-map-emb-is-surjective-and-effective H b a)))
-           ( is-prop-type-Prop
-             ( large-map-emb-is-surjective-and-effective H b a)))
+    triangle-emb-is-surjective-and-effective :
+      (H : is-surjective-and-effective R q) →
+      prop-Eq-Rel R ~ (map-emb-is-surjective-and-effective H ∘ q)
+    triangle-emb-is-surjective-and-effective H a =
+      eq-htpy
+        ( λ x →
+          eq-equiv-Prop
+            ( ( compute-map-emb-is-surjective-and-effective H (q a) x) ∘e
+              ( inv-equiv (pr2 H a x))))
   
-  compute-map-emb-is-surjective-and-effective :
-    (H : is-surjective-and-effective R q) (b : type-Set B) (a : A) →
-    type-Prop (large-map-emb-is-surjective-and-effective H b a) ≃
-    type-Prop (map-emb-is-surjective-and-effective H b a) 
-  compute-map-emb-is-surjective-and-effective H b a =
-    pr2 (pr2 (small-map-emb-is-surjective-and-effective H b a))
-  
-  triangle-emb-is-surjective-and-effective :
-    (H : is-surjective-and-effective R q) →
-    prop-Eq-Rel R ~ (map-emb-is-surjective-and-effective H ∘ q)
-  triangle-emb-is-surjective-and-effective H a =
-    eq-htpy
-      ( λ x →
-        eq-equiv-Prop
-          ( ( compute-map-emb-is-surjective-and-effective H (q a) x) ∘e
-            ( inv-equiv (pr2 H a x))))
-  
-  is-emb-map-emb-is-surjective-and-effective :
-    (H : is-surjective-and-effective R q) →
-    is-emb (map-emb-is-surjective-and-effective H)
-  is-emb-map-emb-is-surjective-and-effective H =
-    is-emb-is-injective
-      ( is-set-function-type (is-set-UU-Prop l2))
-      ( λ {x} {y} p →
-        apply-universal-property-trunc-Prop
-          ( pr1 H y)
-          ( Id-Prop B x y)
-          ( α p))
-    where
-    α : {x y : type-Set B}
-        (p : Id ( map-emb-is-surjective-and-effective H x)
-                ( map-emb-is-surjective-and-effective H y)) →
-        fib q y → type-Prop (Id-Prop B x y)
-    α {x} p (pair a refl) =
-      map-inv-equiv
-        ( ( inv-equiv
-            ( pr2
-              ( is-locally-small-is-surjective-and-effective
-                H (q a) (q a)))) ∘e
-          ( ( equiv-eq (ap pr1 (htpy-eq p a))) ∘e
-            ( pr2
-              ( is-locally-small-is-surjective-and-effective H x (q a)))))
-        ( refl)
+    is-emb-map-emb-is-surjective-and-effective :
+      (H : is-surjective-and-effective R q) →
+      is-emb (map-emb-is-surjective-and-effective H)
+    is-emb-map-emb-is-surjective-and-effective H =
+      is-emb-is-injective
+        ( is-set-function-type (is-set-UU-Prop l2))
+        ( λ {x} {y} p →
+          apply-universal-property-trunc-Prop
+            ( pr1 H y)
+            ( Id-Prop B x y)
+            ( α p))
+      where
+      α : {x y : type-Set B}
+          (p : Id ( map-emb-is-surjective-and-effective H x)
+                  ( map-emb-is-surjective-and-effective H y)) →
+          fib q y → type-Prop (Id-Prop B x y)
+      α {x} p (pair a refl) =
+        map-inv-equiv
+          ( ( inv-equiv
+              ( pr2
+                ( is-locally-small-is-surjective-and-effective
+                  H (q a) (q a)))) ∘e
+            ( ( equiv-eq (ap pr1 (htpy-eq p a))) ∘e
+              ( pr2
+                ( is-locally-small-is-surjective-and-effective H x (q a)))))
+          ( refl)
 
   emb-is-surjective-and-effective :
     (H : is-surjective-and-effective R q) →
     type-Set B ↪ (A → UU-Prop l2)
-  emb-is-surjective-and-effective H =
-    pair ( map-emb-is-surjective-and-effective H)
-         ( is-emb-map-emb-is-surjective-and-effective H)
-
+  pr1 (emb-is-surjective-and-effective H) =
+    map-emb-is-surjective-and-effective H
+  pr2 (emb-is-surjective-and-effective H) =
+    is-emb-map-emb-is-surjective-and-effective H
+  
   is-emb-large-map-emb-is-surjective-and-effective :
     (e : is-surjective-and-effective R q) →
     is-emb (large-map-emb-is-surjective-and-effective e)
@@ -659,9 +660,10 @@ module _
   
   large-emb-is-surjective-and-effective :
     is-surjective-and-effective R q → type-Set B ↪ (A → UU-Prop l3)
-  large-emb-is-surjective-and-effective e =
-    pair ( large-map-emb-is-surjective-and-effective e)
-         ( is-emb-large-map-emb-is-surjective-and-effective e)
+  pr1 (large-emb-is-surjective-and-effective e) =
+    large-map-emb-is-surjective-and-effective e
+  pr2 (large-emb-is-surjective-and-effective e) =
+    is-emb-large-map-emb-is-surjective-and-effective e
 
   is-image-is-surjective-and-effective :
     (H : is-surjective-and-effective R q) →
@@ -718,12 +720,11 @@ module _
     inv-equiv (compute-P y) ∘e δ (q y)
     where
     α : Σ (A → UU-Prop l2) (reflects-Eq-Rel R)
-    α = pair
-          ( prop-Eq-Rel R x)
-          ( λ r →
-            eq-iff
-              ( λ s → trans-Eq-Rel R s r)
-              ( λ s → trans-Eq-Rel R s (symm-Eq-Rel R r)))
+    pr1 α = prop-Eq-Rel R x
+    pr2 α r =
+      eq-iff
+        ( λ s → trans-Eq-Rel R s r)
+        ( λ s → trans-Eq-Rel R s (symm-Eq-Rel R r))
     P : type-Set B → UU-Prop l2
     P = map-inv-is-equiv (Q (UU-Prop-Set l2)) α
     compute-P : (a : A) → type-Eq-Rel R x a ≃ type-Prop (P (q a))
@@ -737,7 +738,8 @@ module _
     point-P : type-Prop (P (q x))
     point-P = map-equiv (compute-P x) (refl-Eq-Rel R)
     center-total-P : Σ (type-Set B) (λ b → type-Prop (P b))
-    center-total-P = pair (q x) point-P
+    pr1 center-total-P = q x
+    pr2 center-total-P = point-P
     contraction-total-P :
       (u : Σ (type-Set B) (λ b → type-Prop (P b))) → Id center-total-P u
     contraction-total-P (pair b p) =
@@ -752,20 +754,24 @@ module _
                   ( inv-tr (λ b → type-Prop (P b)) (pr2 v) p))) ∙
             ( pr2 v)))
     is-contr-total-P : is-contr (Σ (type-Set B) (λ b → type-Prop (P b)))
-    is-contr-total-P = pair center-total-P contraction-total-P
+    pr1 is-contr-total-P = center-total-P
+    pr2 is-contr-total-P = contraction-total-P
     β : (b : type-Set B) → Id (q x) b → type-Prop (P b)
     β .(q x) refl = point-P
     γ : (b : type-Set B) → is-equiv (β b)
     γ = fundamental-theorem-id (q x) point-P is-contr-total-P β
     δ : (b : type-Set B) → Id (q x) b ≃ type-Prop (P b)
-    δ b = pair (β b) (γ b)
+    pr1 (δ b) = β b
+    pr2 (δ b) = γ b
 
   is-surjective-and-effective-is-set-quotient :
     (H : reflects-Eq-Rel R q) →
     ({l : Level} → is-set-quotient l R B (pair q H)) →
     is-surjective-and-effective R q
-  is-surjective-and-effective-is-set-quotient H Q =
-    pair (is-surjective-is-set-quotient H Q) (is-effective-is-set-quotient H Q)
+  pr1 (is-surjective-and-effective-is-set-quotient H Q) =
+    is-surjective-is-set-quotient H Q
+  pr2 (is-surjective-and-effective-is-set-quotient H Q) =
+    is-effective-is-set-quotient H Q
 
   reflects-Eq-Rel-is-surjective-and-effective :
     is-surjective-and-effective R q → reflects-Eq-Rel R q
@@ -915,11 +921,11 @@ dependent-universal-property-set-truncation l {A} B f =
   (X : type-Set B → UU-Set l) → is-equiv (precomp-Π-Set f X)
 
 mere-eq-Eq-Rel : {l1 : Level} (A : UU l1) → Eq-Rel l1 A
-mere-eq-Eq-Rel A =
-  pair
-    mere-eq-Prop
-    ( pair refl-mere-eq (pair symm-mere-eq trans-mere-eq))
-  
+pr1 (mere-eq-Eq-Rel A) = mere-eq-Prop
+pr1 (pr2 (mere-eq-Eq-Rel A)) = refl-mere-eq
+pr1 (pr2 (pr2 (mere-eq-Eq-Rel A))) = symm-mere-eq
+pr2 (pr2 (pr2 (mere-eq-Eq-Rel A))) = trans-mere-eq
+
 dependent-universal-property-is-set-truncation :
   {l1 l2 l3 : Level} {A : UU l1} (B : UU-Set l2) (f : A → type-Set B) →
   ({l : Level} → is-set-truncation l B f) →
@@ -955,7 +961,8 @@ reflects-mere-eq X f {x} {y} r =
 reflecting-map-mere-eq :
   {l1 l2 : Level} {A : UU l1} (X : UU-Set l2) (f : A → type-Set X) →
   reflecting-map-Eq-Rel (mere-eq-Eq-Rel A) (type-Set X)
-reflecting-map-mere-eq X f = pair f (reflects-mere-eq X f)
+pr1 (reflecting-map-mere-eq X f) = f
+pr2 (reflecting-map-mere-eq X f) = reflects-mere-eq X f
 
 is-set-truncation-is-set-quotient :
   {l1 l2 l3 : Level} {A : UU l1} (B : UU-Set l2) (f : A → type-Set B) →
@@ -1081,7 +1088,8 @@ postulate
   is-set-type-trunc-Set : {l : Level} {A : UU l} → is-set (type-trunc-Set A)
 
 trunc-Set : {l : Level} → UU l → UU-Set l
-trunc-Set A = pair (type-trunc-Set A) is-set-type-trunc-Set
+pr1 (trunc-Set A) = type-trunc-Set A
+pr2 (trunc-Set A) = is-set-type-trunc-Set
 
 postulate unit-trunc-Set : {l : Level} {A : UU l} → A → type-Set (trunc-Set A)
 
@@ -1090,163 +1098,163 @@ postulate
     {l1 l2 : Level} (A : UU l1) →
     is-set-truncation l2 (trunc-Set A) unit-trunc-Set
 
-equiv-universal-property-trunc-Set :
-  {l1 l2 : Level} (A : UU l1) (B : UU-Set l2) →
-  (type-trunc-Set A → type-Set B) ≃ (A → type-Set B)
-equiv-universal-property-trunc-Set A B =
-  pair
-    ( precomp-Set unit-trunc-Set B)
-    ( is-set-truncation-trunc-Set A B)
+module _
+  {l1 : Level} {A : UU l1}
+  where
+  
+  equiv-universal-property-trunc-Set :
+    {l2 : Level} (B : UU-Set l2) →
+    (type-trunc-Set A → type-Set B) ≃ (A → type-Set B)
+  pr1 (equiv-universal-property-trunc-Set B) =
+    precomp-Set unit-trunc-Set B
+  pr2 (equiv-universal-property-trunc-Set B) =
+    is-set-truncation-trunc-Set A B
 
-universal-property-trunc-Set : {l1 l2 : Level} (A : UU l1) →
-  universal-property-set-truncation l2
-    ( trunc-Set A)
-    ( unit-trunc-Set)
-universal-property-trunc-Set A =
-  universal-property-is-set-truncation _
-    ( trunc-Set A)
-    ( unit-trunc-Set)
-    ( is-set-truncation-trunc-Set A)
+  universal-property-trunc-Set :
+    {l2 : Level} →
+    universal-property-set-truncation l2
+      ( trunc-Set A)
+      ( unit-trunc-Set)
+  universal-property-trunc-Set =
+    universal-property-is-set-truncation _
+      ( trunc-Set A)
+      ( unit-trunc-Set)
+      ( is-set-truncation-trunc-Set A)
+  
+  map-universal-property-trunc-Set :
+    {l2 : Level} (B : UU-Set l2) →
+    (A → type-Set B) → type-hom-Set (trunc-Set A) B
+  map-universal-property-trunc-Set B f =
+    map-is-set-truncation
+      ( trunc-Set A)
+      ( unit-trunc-Set)
+      ( is-set-truncation-trunc-Set A)
+      ( B)
+      ( f)
 
-map-universal-property-trunc-Set :
-  {l1 l2 : Level} {A : UU l1} (B : UU-Set l2) →
-  (A → type-Set B) → type-hom-Set (trunc-Set A) B
-map-universal-property-trunc-Set {A = A} B f =
-  map-is-set-truncation
-    ( trunc-Set A)
-    ( unit-trunc-Set)
-    ( is-set-truncation-trunc-Set A)
-    ( B)
-    ( f)
+  triangle-universal-property-trunc-Set :
+    {l2 : Level} (B : UU-Set l2) →
+    (f : A → type-Set B) →
+    (map-universal-property-trunc-Set B f ∘ unit-trunc-Set) ~ f
+  triangle-universal-property-trunc-Set B f =
+    triangle-is-set-truncation
+      ( trunc-Set A)
+      ( unit-trunc-Set)
+      ( is-set-truncation-trunc-Set A)
+      ( B)
+      ( f)
 
-triangle-universal-property-trunc-Set :
-  {l1 l2 : Level} {A : UU l1} (B : UU-Set l2) →
-  (f : A → type-Set B) →
-  (map-universal-property-trunc-Set B f ∘ unit-trunc-Set) ~ f
-triangle-universal-property-trunc-Set {A = A} B f =
-  triangle-is-set-truncation
-    ( trunc-Set A)
-    ( unit-trunc-Set)
-    ( is-set-truncation-trunc-Set A)
-    ( B)
-    ( f)
+  apply-universal-property-trunc-Set :
+    {l2 : Level} (t : type-trunc-Set A) (B : UU-Set l2) →
+    (A → type-Set B) → type-Set B
+  apply-universal-property-trunc-Set t B f =
+    map-universal-property-trunc-Set B f t
 
-apply-universal-property-trunc-Set :
-  {l1 l2 : Level} {A : UU l1} (t : type-trunc-Set A) (B : UU-Set l2) →
-  (A → type-Set B) → type-Set B
-apply-universal-property-trunc-Set t B f =
-  map-universal-property-trunc-Set B f t
+  dependent-universal-property-trunc-Set :
+    {l2 : Level} (B : type-trunc-Set A → UU-Set l2) → 
+    is-equiv (precomp-Π-Set unit-trunc-Set B)
+  dependent-universal-property-trunc-Set =
+    dependent-universal-property-is-set-truncation
+      ( trunc-Set A)
+      ( unit-trunc-Set)
+      ( λ {l} → is-set-truncation-trunc-Set A)
+  
+  equiv-dependent-universal-property-trunc-Set :
+    {l2 : Level} (B : type-trunc-Set A → UU-Set l2) →
+    ((x : type-trunc-Set A) → type-Set (B x)) ≃
+    ((a : A) → type-Set (B (unit-trunc-Set a)))
+  pr1 (equiv-dependent-universal-property-trunc-Set B) =
+    precomp-Π-Set unit-trunc-Set B
+  pr2 (equiv-dependent-universal-property-trunc-Set B) =
+    dependent-universal-property-trunc-Set B
 
-dependent-universal-property-trunc-Set :
-  {l1 l2 : Level} {A : UU l1} (B : type-trunc-Set A → UU-Set l2) → 
-  is-equiv (precomp-Π-Set unit-trunc-Set B)
-dependent-universal-property-trunc-Set {A = A} =
-  dependent-universal-property-is-set-truncation
-    ( trunc-Set A)
-    ( unit-trunc-Set)
-    ( λ {l} → is-set-truncation-trunc-Set A)
+  apply-dependent-universal-property-trunc-Set :
+    {l2 : Level} (B : type-trunc-Set A → UU-Set l2) →
+    ((x : A) → type-Set (B (unit-trunc-Set x))) →
+    (x : type-trunc-Set A) → type-Set (B x)
+  apply-dependent-universal-property-trunc-Set B =
+    map-inv-equiv (equiv-dependent-universal-property-trunc-Set B)
 
-equiv-dependent-universal-property-trunc-Set :
-  {l1 l2 : Level} {A : UU l1} (B : type-trunc-Set A → UU-Set l2) →
-  ((x : type-trunc-Set A) → type-Set (B x)) ≃
-  ((a : A) → type-Set (B (unit-trunc-Set a)))
-equiv-dependent-universal-property-trunc-Set B =
-  pair ( precomp-Π-Set unit-trunc-Set B)
-       ( dependent-universal-property-trunc-Set B)
+  reflecting-map-mere-eq-unit-trunc-Set :
+    reflecting-map-Eq-Rel (mere-eq-Eq-Rel A) (type-trunc-Set A)
+  pr1 reflecting-map-mere-eq-unit-trunc-Set = unit-trunc-Set
+  pr2 reflecting-map-mere-eq-unit-trunc-Set =
+    reflects-mere-eq (trunc-Set A) unit-trunc-Set
 
-apply-dependent-universal-property-trunc-Set :
-  {l1 l2 : Level} {A : UU l1}
-  (B : type-trunc-Set A → UU-Set l2) →
-  ((x : A) → type-Set (B (unit-trunc-Set x))) →
-  (x : type-trunc-Set A) → type-Set (B x)
-apply-dependent-universal-property-trunc-Set B =
-  map-inv-equiv (equiv-dependent-universal-property-trunc-Set B)
-
-reflecting-map-mere-eq-unit-trunc-Set :
-  {l : Level} (A : UU l) →
-  reflecting-map-Eq-Rel (mere-eq-Eq-Rel A) (type-trunc-Set A)
-reflecting-map-mere-eq-unit-trunc-Set A =
-  pair unit-trunc-Set (reflects-mere-eq (trunc-Set A) unit-trunc-Set)
-
-is-set-quotient-trunc-Set :
-  {l1 l2 : Level} (A : UU l1) →
-  is-set-quotient l2
-    ( mere-eq-Eq-Rel A)
-    ( trunc-Set A)
-    ( reflecting-map-mere-eq-unit-trunc-Set A)
-is-set-quotient-trunc-Set A =
-  is-set-quotient-is-set-truncation
-    ( trunc-Set A)
-    ( unit-trunc-Set)
-    ( λ {l} → is-set-truncation-trunc-Set A)
-
-is-surjective-and-effective-unit-trunc-Set :
-  {l1 : Level} (A : UU l1) →
-  is-surjective-and-effective (mere-eq-Eq-Rel A) unit-trunc-Set
-is-surjective-and-effective-unit-trunc-Set A =
-  is-surjective-and-effective-is-set-quotient
-    ( mere-eq-Eq-Rel A)
-    ( trunc-Set A)
-    ( unit-trunc-Set)
-    ( reflects-mere-eq (trunc-Set A) unit-trunc-Set)
-    ( λ {l} → is-set-quotient-trunc-Set A)
-
-is-surjective-unit-trunc-Set :
-  {l1 : Level} (A : UU l1) → is-surjective (unit-trunc-Set {A = A})
-is-surjective-unit-trunc-Set A =
-  pr1 (is-surjective-and-effective-unit-trunc-Set A)
-
-is-effective-unit-trunc-Set :
-  {l1 : Level} (A : UU l1) →
-  is-effective (mere-eq-Eq-Rel A) (unit-trunc-Set {A = A})
-is-effective-unit-trunc-Set A =
-  pr2 (is-surjective-and-effective-unit-trunc-Set A)
-
-apply-effectiveness-unit-trunc-Set :
-  {l1 : Level} {A : UU l1} {x y : A} →
-  Id (unit-trunc-Set x) (unit-trunc-Set y) → mere-eq x y
-apply-effectiveness-unit-trunc-Set {A = A} {x} {y} =
-  map-equiv (is-effective-unit-trunc-Set A x y)
-
-apply-effectiveness-unit-trunc-Set' :
-  {l1 : Level} {A : UU l1} {x y : A} →
-  mere-eq x y → Id (unit-trunc-Set x) (unit-trunc-Set y)
-apply-effectiveness-unit-trunc-Set' {A = A} {x} {y} =
-  map-inv-equiv (is-effective-unit-trunc-Set A x y)
-
-emb-trunc-Set :
-  {l1 : Level} (A : UU l1) → type-trunc-Set A ↪ (A → UU-Prop l1)
-emb-trunc-Set A =
-  emb-is-surjective-and-effective
-    ( mere-eq-Eq-Rel A)
-    ( trunc-Set A)
-    ( unit-trunc-Set)
-    ( is-surjective-and-effective-unit-trunc-Set A)
-
-hom-slice-trunc-Set :
-  {l1 : Level} (A : UU l1) →
-  hom-slice (mere-eq-Prop {A = A}) (map-emb (emb-trunc-Set A))
-hom-slice-trunc-Set A =
-  pair
-    ( unit-trunc-Set)
-    ( triangle-emb-is-surjective-and-effective
+  is-set-quotient-trunc-Set :
+    {l2 : Level} →
+    is-set-quotient l2
+      ( mere-eq-Eq-Rel A)
+      ( trunc-Set A)
+      ( reflecting-map-mere-eq-unit-trunc-Set)
+  is-set-quotient-trunc-Set =
+    is-set-quotient-is-set-truncation
+      ( trunc-Set A)
+      ( unit-trunc-Set)
+      ( λ {l} → is-set-truncation-trunc-Set A)
+  
+  is-surjective-and-effective-unit-trunc-Set :
+    is-surjective-and-effective (mere-eq-Eq-Rel A) unit-trunc-Set
+  is-surjective-and-effective-unit-trunc-Set =
+    is-surjective-and-effective-is-set-quotient
       ( mere-eq-Eq-Rel A)
       ( trunc-Set A)
       ( unit-trunc-Set)
-      ( is-surjective-and-effective-unit-trunc-Set A))
+      ( reflects-mere-eq (trunc-Set A) unit-trunc-Set)
+      ( λ {l} → is-set-quotient-trunc-Set)
 
+  is-surjective-unit-trunc-Set : is-surjective (unit-trunc-Set {A = A})
+  is-surjective-unit-trunc-Set =
+    pr1 is-surjective-and-effective-unit-trunc-Set
+
+  is-effective-unit-trunc-Set :
+    is-effective (mere-eq-Eq-Rel A) (unit-trunc-Set {A = A})
+  is-effective-unit-trunc-Set =
+    pr2 is-surjective-and-effective-unit-trunc-Set
+
+  apply-effectiveness-unit-trunc-Set :
+    {x y : A} → Id (unit-trunc-Set x) (unit-trunc-Set y) → mere-eq x y
+  apply-effectiveness-unit-trunc-Set {x} {y} =
+    map-equiv (is-effective-unit-trunc-Set x y)
+
+  apply-effectiveness-unit-trunc-Set' :
+    {x y : A} → mere-eq x y → Id (unit-trunc-Set x) (unit-trunc-Set y)
+  apply-effectiveness-unit-trunc-Set' {x} {y} =
+    map-inv-equiv (is-effective-unit-trunc-Set x y)
+
+  emb-trunc-Set : type-trunc-Set A ↪ (A → UU-Prop l1)
+  emb-trunc-Set =
+    emb-is-surjective-and-effective
+      ( mere-eq-Eq-Rel A)
+      ( trunc-Set A)
+      ( unit-trunc-Set)
+      ( is-surjective-and-effective-unit-trunc-Set)
+
+
+  -- !! This definition is slow without use of abstract above
+  hom-slice-trunc-Set :
+    hom-slice (mere-eq-Prop {A = A}) (map-emb emb-trunc-Set)
+  pr1 hom-slice-trunc-Set = unit-trunc-Set
+  pr2 hom-slice-trunc-Set x =
+    triangle-emb-is-surjective-and-effective
+      ( mere-eq-Eq-Rel A)
+      ( trunc-Set A)
+      ( unit-trunc-Set)
+      ( is-surjective-and-effective-unit-trunc-Set)
+      ( x)
+      
 is-image-trunc-Set :
   {l1 l2 : Level} (A : UU l1) →
   is-image l2
     ( mere-eq-Prop {A = A})
-    ( emb-trunc-Set A)
-    ( hom-slice-trunc-Set A)
+    ( emb-trunc-Set)
+    ( hom-slice-trunc-Set)
 is-image-trunc-Set A =
   is-image-is-surjective-and-effective
     ( mere-eq-Eq-Rel A)
     ( trunc-Set A)
     ( unit-trunc-Set)
-    ( is-surjective-and-effective-unit-trunc-Set A)
+    ( is-surjective-and-effective-unit-trunc-Set)
 
 module _
   {l1 l2 : Level} {A : UU l1} (B : UU-Set l2) (f : A → type-Set B)
@@ -1314,8 +1322,8 @@ is-equiv-unit-trunc-Set A =
 
 equiv-unit-trunc-Set :
   {l : Level} (A : UU-Set l) → type-Set A ≃ type-trunc-Set (type-Set A)
-equiv-unit-trunc-Set A =
-  pair unit-trunc-Set (is-equiv-unit-trunc-Set A)
+pr1 (equiv-unit-trunc-Set A) = unit-trunc-Set
+pr2 (equiv-unit-trunc-Set A) = is-equiv-unit-trunc-Set A
 
 equiv-unit-trunc-empty-Set : empty ≃ type-trunc-Set empty
 equiv-unit-trunc-empty-Set = equiv-unit-trunc-Set empty-Set
@@ -1410,7 +1418,7 @@ module _
       ( Σ ( type-trunc-Set A → type-trunc-Set B)
           ( λ h → (h ∘ unit-trunc-Set) ~ (unit-trunc-Set ∘ f)))
   unique-map-trunc-Set =
-    universal-property-trunc-Set A (trunc-Set B) (unit-trunc-Set ∘ f)
+    universal-property-trunc-Set (trunc-Set B) (unit-trunc-Set ∘ f)
 
   map-trunc-Set :
     type-trunc-Set A → type-trunc-Set B
@@ -1439,7 +1447,7 @@ map-id-trunc-Set {l1} {A} =
   htpy-eq
     ( ap pr1
       ( eq-is-contr
-        ( universal-property-trunc-Set A (trunc-Set A) unit-trunc-Set)
+        ( universal-property-trunc-Set (trunc-Set A) unit-trunc-Set)
         { pair (map-trunc-Set id) (naturality-trunc-Set id)}
         { pair id refl-htpy}))
 
@@ -1452,9 +1460,8 @@ map-comp-trunc-Set {A = A} {C = C} g f =
     ( ap pr1
       ( eq-is-contr
         ( universal-property-trunc-Set
-          A
-          (trunc-Set C)
-          (unit-trunc-Set ∘ (g ∘ f)))
+          ( trunc-Set C)
+          ( unit-trunc-Set ∘ (g ∘ f)))
         { pair (map-trunc-Set (g ∘ f)) (naturality-trunc-Set (g ∘ f))}
         { pair ( map-trunc-Set g ∘ map-trunc-Set f)
                ( ( map-trunc-Set g ·l naturality-trunc-Set f) ∙h
@@ -1477,26 +1484,22 @@ htpy-trunc-Set {B = B} {f = f} {g} H =
 is-equiv-map-trunc-Set :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} {f : A → B} →
   is-equiv f → is-equiv (map-trunc-Set f)
-is-equiv-map-trunc-Set {f = f} H =
-  pair
-    ( pair
-      ( map-trunc-Set (pr1 (pr1 H)))
-      ( ( inv-htpy (map-comp-trunc-Set f (pr1 (pr1 H)))) ∙h
-        ( ( htpy-trunc-Set (pr2 (pr1 H))) ∙h
-          ( map-id-trunc-Set))))
-    ( pair
-      ( map-trunc-Set (pr1 (pr2 H)))
-      ( ( inv-htpy (map-comp-trunc-Set (pr1 (pr2 H)) f)) ∙h
-        ( ( htpy-trunc-Set (pr2 (pr2 H))) ∙h
-          ( map-id-trunc-Set))))
+pr1 (pr1 (is-equiv-map-trunc-Set {f = f} H)) = map-trunc-Set (pr1 (pr1 H))
+pr2 (pr1 (is-equiv-map-trunc-Set {f = f} H)) =
+  ( inv-htpy (map-comp-trunc-Set f (pr1 (pr1 H)))) ∙h
+  ( ( htpy-trunc-Set (pr2 (pr1 H))) ∙h
+    ( map-id-trunc-Set))
+pr1 (pr2 (is-equiv-map-trunc-Set {f = f} H)) = map-trunc-Set (pr1 (pr2 H))
+pr2 (pr2 (is-equiv-map-trunc-Set {f = f} H)) =
+  ( inv-htpy (map-comp-trunc-Set (pr1 (pr2 H)) f)) ∙h
+  ( ( htpy-trunc-Set (pr2 (pr2 H))) ∙h
+    ( map-id-trunc-Set))
 
 equiv-trunc-Set :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} →
   (A ≃ B) → (type-trunc-Set A ≃ type-trunc-Set B)
-equiv-trunc-Set e =
-  pair
-    ( map-trunc-Set (map-equiv e))
-    ( is-equiv-map-trunc-Set (is-equiv-map-equiv e))
+pr1 (equiv-trunc-Set e) = map-trunc-Set (map-equiv e)
+pr2 (equiv-trunc-Set e) = is-equiv-map-trunc-Set (is-equiv-map-equiv e)
 
 map-equiv-trunc-Set :
   {l1 l2 : Level} {A : UU l1} {B : UU l2} →
@@ -1578,10 +1581,9 @@ module _
           ( is-equiv-ev-pair)
           ( is-equiv-htpy-equiv
             ( ( equiv-map-Π
-                ( λ x → equiv-universal-property-trunc-Set (B x) C)) ∘e
+                ( λ x → equiv-universal-property-trunc-Set C)) ∘e
               ( ( equiv-ev-pair) ∘e
-                ( equiv-universal-property-trunc-Set
-                  ( Σ A (type-trunc-Set ∘ B)) C)))
+                ( equiv-universal-property-trunc-Set C)))
             ( refl-htpy)))
 
   equiv-trunc-Σ-Set :
@@ -1635,10 +1637,10 @@ module _
           ( precomp-Set (map-prod unit-trunc-Set unit-trunc-Set) C)
           ( is-equiv-ev-pair)
           ( is-equiv-htpy-equiv
-            ( ( equiv-universal-property-trunc-Set A (Π-Set' B (λ y → C))) ∘e
+            ( ( equiv-universal-property-trunc-Set (Π-Set' B (λ y → C))) ∘e
               ( ( equiv-postcomp
                   ( type-trunc-Set A)
-                  (equiv-universal-property-trunc-Set B C)) ∘e
+                  ( equiv-universal-property-trunc-Set C)) ∘e
                 ( equiv-ev-pair)))
             ( refl-htpy)))
 
@@ -1718,7 +1720,7 @@ distributive-trunc-Π-Fin-Set (succ-ℕ k) A =
                       ( Π-Set' (A (inr star)) (λ a → B)))) ∘e
                   ( equiv-postcomp
                     ( (x : Fin k) → type-trunc-Set (A (inl x)))
-                    ( equiv-universal-property-trunc-Set (A (inr star)) B))) ∘e
+                    ( equiv-universal-property-trunc-Set B))) ∘e
                 ( equiv-ev-pair))
               ( refl-htpy)))
           ( is-equiv-precomp-is-equiv
@@ -1921,12 +1923,11 @@ mere-eq-is-path-connected {A = A} H x y =
 
 is-path-connected-mere-eq :
   {l : Level} {A : UU l} (a : A) → ((x : A) → mere-eq a x) → is-path-connected A
-is-path-connected-mere-eq {l} {A} a e =
-  pair
-    ( unit-trunc-Set a)
-    ( apply-dependent-universal-property-trunc-Set
-        ( λ x → set-Prop (Id-Prop (trunc-Set A) (unit-trunc-Set a) x))
-        ( λ x → apply-effectiveness-unit-trunc-Set' (e x)))
+pr1 (is-path-connected-mere-eq {l} {A} a e) = unit-trunc-Set a
+pr2 (is-path-connected-mere-eq {l} {A} a e) =
+  apply-dependent-universal-property-trunc-Set
+    ( λ x → set-Prop (Id-Prop (trunc-Set A) (unit-trunc-Set a) x))
+    ( λ x → apply-effectiveness-unit-trunc-Set' (e x))
 
 is-surjective-fiber-inclusion :
   {l1 l2 : Level} {A : UU l1} {B : A → UU l2} →
@@ -2031,7 +2032,7 @@ module _
       ( trunc-Prop (fib f b))
       ( λ { (pair x p) →
             apply-universal-property-trunc-Prop
-              ( is-surjective-unit-trunc-Set A x)
+              ( is-surjective-unit-trunc-Set x)
               ( trunc-Prop (fib f b))
               ( λ { (pair a refl) →
                     apply-universal-property-trunc-Prop
@@ -2043,7 +2044,8 @@ module _
 im-Set :
   {l1 l2 : Level} {A : UU l2} (X : UU-Set l1) (f : A → type-Set X) →
   UU-Set (l1 ⊔ l2)
-im-Set X f = pair (im f) (is-set-im f (is-set-type-Set X))
+pr1 (im-Set X f) = im f
+pr2 (im-Set X f) = is-set-im f (is-set-type-Set X)
 
 module _
   {l1 l2 : Level} {A : UU l1} {B : UU l2} (f : A → B)
@@ -2061,7 +2063,8 @@ module _
         ( is-injective-is-emb (is-emb-inclusion-im f)))
 
   emb-trunc-im-Set : type-trunc-Set (im f) ↪ type-trunc-Set B
-  emb-trunc-im-Set = pair inclusion-trunc-im-Set is-emb-inclusion-trunc-im-Set
+  pr1 emb-trunc-im-Set = inclusion-trunc-im-Set
+  pr2 emb-trunc-im-Set = is-emb-inclusion-trunc-im-Set
 
   is-injective-inclusion-trunc-im-Set : is-injective inclusion-trunc-im-Set
   is-injective-inclusion-trunc-im-Set =
@@ -2077,8 +2080,8 @@ module _
     ( map-comp-trunc-Set (inclusion-im f) (map-unit-im f))
 
   hom-slice-trunc-im-Set : hom-slice (map-trunc-Set f) inclusion-trunc-im-Set
-  hom-slice-trunc-im-Set =
-    pair map-hom-slice-trunc-im-Set triangle-hom-slice-trunc-im-Set
+  pr1 hom-slice-trunc-im-Set = map-hom-slice-trunc-im-Set
+  pr2 hom-slice-trunc-im-Set = triangle-hom-slice-trunc-im-Set
 
   is-surjective-map-hom-slice-trunc-im-Set :
     is-surjective map-hom-slice-trunc-im-Set
@@ -2169,16 +2172,15 @@ module _
 
   unit-im-map-trunc-Set :
     im f → im (map-trunc-Set f)
-  unit-im-map-trunc-Set x =
-    pair
-      ( unit-trunc-Set (pr1 x))
-      ( apply-universal-property-trunc-Prop (pr2 x)
-        ( trunc-Prop (fib (map-trunc-Set f) (unit-trunc-Set (pr1 x))))
-        ( λ u →
-          unit-trunc-Prop
-            ( pair
-              ( unit-trunc-Set (pr1 u))
-              ( naturality-trunc-Set f (pr1 u) ∙ ap unit-trunc-Set (pr2 u)))))
+  pr1 (unit-im-map-trunc-Set x) = unit-trunc-Set (pr1 x)
+  pr2 (unit-im-map-trunc-Set x) =
+    apply-universal-property-trunc-Prop (pr2 x)
+      ( trunc-Prop (fib (map-trunc-Set f) (unit-trunc-Set (pr1 x))))
+      ( λ u →
+        unit-trunc-Prop
+          ( pair
+            ( unit-trunc-Set (pr1 u))
+            ( naturality-trunc-Set f (pr1 u) ∙ ap unit-trunc-Set (pr2 u))))
 
   left-square-unit-im-map-trunc-Set :
     ( map-unit-im (map-trunc-Set f) ∘ unit-trunc-Set) ~
@@ -2259,7 +2261,7 @@ has-finite-presentation-has-cardinality-components {l} {k} {A} H =
   where
   P1 : (e : Fin k ≃ type-trunc-Set A) (x : Fin k) →
        type-trunc-Prop (fib unit-trunc-Set (map-equiv e x))
-  P1 e x = is-surjective-unit-trunc-Set A (map-equiv e x)
+  P1 e x = is-surjective-unit-trunc-Set (map-equiv e x)
   P2 : (e : Fin k ≃ type-trunc-Set A) →
        type-trunc-Prop ((x : Fin k) → fib unit-trunc-Set (map-equiv e x))
   P2 e = finite-choice-Fin (P1 e)
